@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -15,11 +16,27 @@ public class JacksonBeanReader<T> implements BeanReader<T> {
   private final JavaType type;
 
   public JacksonBeanReader(Class<T> type) {
-    this((Type) type);
+    this(Jackson.defaultObjectReader(), (Type) type);
+  }
+
+  public JacksonBeanReader(ObjectReader reader, Class<T> type) {
+    this(reader, (Type) type);
+  }
+
+  public JacksonBeanReader(TypeReference<T> typeReference) {
+    this(Jackson.defaultObjectReader(), typeReference.getType());
+  }
+
+  public JacksonBeanReader(ObjectReader reader, TypeReference<T> typeReference) {
+    this(reader, typeReference.getType());
   }
 
   public JacksonBeanReader(Type type) {
-    this(TypeFactory.defaultInstance().constructType(type));
+    this(Jackson.defaultObjectReader(), type);
+  }
+
+  public JacksonBeanReader(ObjectReader reader, Type type) {
+    this(reader, TypeFactory.defaultInstance().constructType(type));
   }
 
   public JacksonBeanReader(JavaType type) {

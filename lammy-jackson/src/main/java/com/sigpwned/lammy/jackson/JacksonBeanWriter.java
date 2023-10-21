@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -16,11 +17,27 @@ public class JacksonBeanWriter<T> implements BeanWriter<T> {
   private final JavaType type;
 
   public JacksonBeanWriter(Class<T> type) {
-    this((Type) type);
+    this(Jackson.defaultObjectWriter(), (Type) type);
+  }
+
+  public JacksonBeanWriter(ObjectWriter writer, Class<T> type) {
+    this(writer, (Type) type);
+  }
+
+  public JacksonBeanWriter(TypeReference<T> typeReference) {
+    this(Jackson.defaultObjectWriter(), typeReference.getType());
+  }
+
+  public JacksonBeanWriter(ObjectWriter writer, TypeReference<T> typeReference) {
+    this(writer, typeReference.getType());
   }
 
   public JacksonBeanWriter(Type type) {
-    this(TypeFactory.defaultInstance().constructType(type));
+    this(Jackson.defaultObjectWriter(), type);
+  }
+
+  public JacksonBeanWriter(ObjectWriter writer, Type type) {
+    this(writer, TypeFactory.defaultInstance().constructType(type));
   }
 
   public JacksonBeanWriter(JavaType type) {
