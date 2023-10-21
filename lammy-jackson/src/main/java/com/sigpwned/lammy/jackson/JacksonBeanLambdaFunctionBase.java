@@ -22,7 +22,7 @@ public abstract class JacksonBeanLambdaFunctionBase<InputT, OutputT>
     setBeanReader(new JacksonBeanReader<>(inputType));
 
     final Type outputType =
-        GenericTypes.findGenericParameter(getClass(), JacksonBeanLambdaFunctionBase.class, 1)
+        GenericTypes.findGenericParameter(clazz, JacksonBeanLambdaFunctionBase.class, 1)
             .orElseThrow(() -> new AssertionError(format(
                 "Class %s must extend JacksonBeanLambdaFunctionBase with concrete output type",
                 clazz.getName())));

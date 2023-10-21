@@ -18,6 +18,7 @@ public abstract class JacksonBeanLambdaConsumerBase<InputT> extends BeanLambdaCo
             .orElseThrow(() -> new AssertionError(format(
                 "Class %s must extend JacksonBeanLambdaFunctionBase with concrete input type",
                 clazz.getName())));
+
     setBeanReader(new JacksonBeanReader<>(inputType));
   }
 

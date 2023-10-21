@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,11 +33,16 @@ public abstract class BeanLambdaFunctionBase<InputT, OutputT> extends StreamLamb
   private final List<BeanLambdaRequestFilter<InputT>> requestFilters;
   private final List<BeanLambdaResponseFilter<InputT, OutputT>> responseFilters;
 
-  public BeanLambdaFunctionBase() {
-    this(null, null);
+  protected BeanLambdaFunctionBase() {
+    this.requestFilters = new ArrayList<>();
+    this.responseFilters = new ArrayList<>();
   }
 
   public BeanLambdaFunctionBase(BeanReader<InputT> beanReader, BeanWriter<OutputT> beanWriter) {
+    if (beanReader == null)
+      throw new NullPointerException();
+    if (beanWriter == null)
+      throw new NullPointerException();
     this.beanReader = beanReader;
     this.beanWriter = beanWriter;
     this.requestFilters = new ArrayList<>();
