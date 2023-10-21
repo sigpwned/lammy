@@ -8,7 +8,7 @@
     <name>lammy-project</name>
     <inceptionYear>2023</inceptionYear>
     <description>
-        Lightweight framework for building AWS Lambda functions in Java 8+
+        Microframework for building AWS Lambda functions in Java 8+
     </description>
     <url>https://github.com/humangraphics/lammy</url>
     <packaging>pom</packaging>
