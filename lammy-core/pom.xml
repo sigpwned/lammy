@@ -5,8 +5,9 @@
 
     <parent>
         <groupId>com.sigpwned</groupId>
-        <artifactId>lammy</artifactId>
+        <artifactId>lammy-parent</artifactId>
         <version>0.0.0-SNAPSHOT</version>
+        <relativePath>../lammy-parent</relativePath>
     </parent>
 
     <artifactId>lammy-core</artifactId>
@@ -62,11 +63,22 @@
             <groupId>io.github.crac</groupId>
             <artifactId>org-crac</artifactId>
         </dependency>
-        <!-- We need this for fancy reflection -->
+        <!-- These are provided by the Lambda runtime -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-events</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-log4j2</artifactId>
+        </dependency>
+        <!-- We need this for fancy reflection. -->
+        <!-- Note that it's repackaged, hence why provided is safe. -->
         <dependency>
             <groupId>io.leangen.geantyref</groupId>
             <artifactId>geantyref</artifactId>
             <version>1.3.14</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Testing -->
