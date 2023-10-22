@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sigpwned</groupId>
     <artifactId>lammy-dependencies</artifactId>
-    <version>0.0.0-b0</version>
+    <version>0.0.0-b1-SNAPSHOT</version>
     <name>lammy-dependencies</name>
     <description>
         All dependencies for all lammy modules. Includes lambda runtime dependencies.
@@ -16,7 +16,7 @@
             <dependency>
                 <groupId>com.sigpwned</groupId>
                 <artifactId>lammy-lambda-runtime-bom</artifactId>
-                <version>0.0.0-b0</version>
+                <version>0.0.0-b1-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
