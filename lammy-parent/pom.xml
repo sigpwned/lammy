@@ -14,21 +14,52 @@
     <description>
         Lammy parent POM
     </description>
+    <url>https://github.com/humangraphics/lammy</url>
+    <inceptionYear>2023</inceptionYear>
     <organization>
         <name>Andy Boothe</name>
         <url>https://www.sigpwned.com/</url>
     </organization>
-    <inceptionYear>2023</inceptionYear>
+    <scm>
+        <connection>scm:git:ssh://git@github.com/sigpwned/lammy.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/sigpwned/lammy.git</developerConnection>
+        <url>https://github.com/sigpwned/lammy/tree/main</url>
+        <tag>HEAD</tag>
+    </scm>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Andy Boothe</name>
+            <email>andy.boothe@gmail.com</email>
+        </developer>
+    </developers>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <name>Nexus Release Repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/sigpwned/emoji4j</url>
+    </issueManagement>
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <sonar.organization>sigpwned</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.exclusions>
-            **/pom.xml
-        </sonar.exclusions>
-
         <junit.version>5.10.0</junit.version>
     </properties>
     <build>
