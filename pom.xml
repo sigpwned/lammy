@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sigpwned</groupId>
     <artifactId>lammy-project</artifactId>
-    <version>0.0.0-b0</version>
+    <version>0.0.0-b1-SNAPSHOT</version>
     <name>lammy-project</name>
     <description>
         Microframework for building AWS Lambda functions in Java 8+
@@ -21,7 +21,7 @@
         <connection>scm:git:ssh://git@github.com/sigpwned/lammy.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/sigpwned/lammy.git</developerConnection>
         <url>https://github.com/sigpwned/lammy/tree/main</url>
-        <tag>v0.0.0-b0</tag>
+        <tag>HEAD</tag>
     </scm>
     <licenses>
         <license>
