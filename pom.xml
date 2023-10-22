@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sigpwned</groupId>
     <artifactId>lammy-project</artifactId>
-    <version>0.0.0-b1-SNAPSHOT</version>
+    <version>0.0.0-b0</version>
     <name>lammy-project</name>
     <inceptionYear>2023</inceptionYear>
     <description>
@@ -18,7 +18,7 @@
         <connection>scm:git:ssh://git@github.com/sigpwned/lammy.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/sigpwned/lammy.git</developerConnection>
         <url>https://github.com/sigpwned/lammy/tree/main</url>
-        <tag>HEAD</tag>
+        <tag>v0.0.0-b0</tag>
     </scm>
     <licenses>
         <license>

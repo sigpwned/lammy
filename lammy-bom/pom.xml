@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sigpwned</groupId>
     <artifactId>lammy-bom</artifactId>
-    <version>0.0.0-b1-SNAPSHOT</version>
+    <version>0.0.0-b0</version>
     <name>lammy-bom</name>
     <description>
         BOM for Lammy project artifacts
@@ -13,12 +13,12 @@
             <dependency>
                 <groupId>com.sigpwned</groupId>
                 <artifactId>lammy-core</artifactId>
-                <version>0.0.0-b1-SNAPSHOT</version>
+                <version>0.0.0-b0</version>
             </dependency>
             <dependency>
                 <groupId>com.sigpwned</groupId>
                 <artifactId>lammy-jackson</artifactId>
-                <version>0.0.0-b1-SNAPSHOT</version>
+                <version>0.0.0-b0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

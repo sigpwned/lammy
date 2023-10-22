@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sigpwned</groupId>
     <artifactId>lammy-lambda-runtime-bom</artifactId>
-    <version>0.0.0-b1-SNAPSHOT</version>
+    <version>0.0.0-b0</version>
     <name>lammy-lambda-runtime-bom</name>
     <description>
         Dependencies representing the Java runtime environment for AWS Lambda.

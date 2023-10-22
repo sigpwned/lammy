@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.sigpwned</groupId>
         <artifactId>lammy-dependencies</artifactId>
-        <version>0.0.0-b1-SNAPSHOT</version>
+        <version>0.0.0-b0</version>
         <relativePath>../lammy-dependencies</relativePath>
     </parent>
     <artifactId>lammy-parent</artifactId>
