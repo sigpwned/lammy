@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.sigpwned</groupId>
         <artifactId>lammy-parent</artifactId>
-        <version>0.0.0-b0</version>
+        <version>0.0.0-b1-SNAPSHOT</version>
         <relativePath>../lammy-parent</relativePath>
     </parent>
 

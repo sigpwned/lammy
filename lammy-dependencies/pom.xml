@@ -3,7 +3,7 @@
     <parent>
         <groupId>com.sigpwned</groupId>
         <artifactId>lammy-bom</artifactId>
-        <version>0.0.0-b0</version>
+        <version>0.0.0-b1-SNAPSHOT</version>
         <relativePath>../lammy-bom</relativePath>
     </parent>
     <artifactId>lammy-dependencies</artifactId>
@@ -21,7 +21,7 @@
             <dependency>
                 <groupId>com.sigpwned</groupId>
                 <artifactId>lammy-lambda-runtime-bom</artifactId>
-                <version>0.0.0-b0</version>
+                <version>0.0.0-b1-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
