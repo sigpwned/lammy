@@ -14,7 +14,32 @@ Lammy is a microframework for building AWS Lambda functions in Java 8+.
 
 ## Design Philosophy
 
-Lammy's design is heavily influenced by [JAX-RS](https://jakarta.ee/specifications/restful-ws/). Specifically, the framework implement a straightforward, mechanical control flow that centralizes business logic while exposing hooks that libraries and applications can use for things like customization, serialization, exception handling, and so on. If Lammy's design feels familiar, then the design is working as intended!
+Lammy's design is heavily influenced by [JAX-RS](https://jakarta.ee/specifications/restful-ws/). Specifically, the framework implement a straightforward, mechanical control flow that centralizes business logic while exposing hooks that libraries and applications can use for things like customization, serialization, exception handling, and so on. Hopefully, Lammy's design feels clear and familiar.
+
+## Examples
+
+Here are some simple examples to illustrate how Lammy works:
+
+### Hello World
+
+This function takes a name and gives a gretting provided by an environment variable:
+
+    public class HelloWorldFunction extends JacksonBeanLambdaFunctionBase<GreetingRequest,GreetingResponse> {
+        public static final String GREETING=getenv("GREETING").orElse("Hello");
+
+        @Override
+        public GreetingResponse handleBeanRequest(GreetingRequest request, Context context) {
+            return new GreetingResponse(String.format("%s, %s!", GREETING, request.name()));
+        }
+    }
+
+    record GreetingRequest(String name) {}
+
+    record GreetingResponse(String greeting) {}
+
+The framework provides [Jackson](https://github.com/FasterXML/jackson) serialization out of the box and provides serialization for input and output types automatically. Of course, applications can also specialize or customize serialization as desired using custom serializers, either with or without Jackson.
+
+Additionally, the framework provides some utility methods for configuration using environment variables, such as `getenv` shown here, which returns an `OptionalEnvironmentVariable`.
 
 ## Supported Lambda Function Varieties
 
