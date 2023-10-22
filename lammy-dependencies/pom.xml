@@ -2,12 +2,17 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.sigpwned</groupId>
+    <parent>
+        <groupId>com.sigpwned</groupId>
+        <artifactId>lammy-bom</artifactId>
+        <version>0.0.0-SNAPSHOT</version>
+        <relativePath>../lammy-bom</relativePath>
+    </parent>
     <artifactId>lammy-dependencies</artifactId>
-    <version>0.0.0-SNAPSHOT</version>
     <name>lammy-dependencies</name>
     <description>
-        All dependencies for all lammy modules. Includes lambda runtime dependencies.
+        All dependencies for all lammy modules. Includes lambda runtime
+        dependencies.
     </description>
     <packaging>pom</packaging>
     <properties>
