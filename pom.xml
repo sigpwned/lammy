@@ -59,7 +59,6 @@
 
     <!-- Modules -->
     <modules>
-        <module>lammy-lambda-runtime-bom</module>
         <module>lammy-dependencies</module>
         <module>lammy-parent</module>
         <module>lammy-core</module>
