@@ -65,15 +65,9 @@
             <artifactId>aws-lambda-java-core</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!-- These are provided by the Lambda runtime -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-events</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
-            <artifactId>aws-lambda-java-log4j2</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -100,10 +94,6 @@
         https://frank-afriat.medium.com/solving-the-java-aws-lambda-logging-problem-305b06df457f -->
         <!--
         https://docs.aws.amazon.com/lambda/latest/dg/java-logging.html#java-logging-log4j2 -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
