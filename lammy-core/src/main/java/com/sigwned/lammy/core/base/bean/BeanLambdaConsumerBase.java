@@ -54,11 +54,6 @@ public abstract class BeanLambdaConsumerBase<RequestT> extends BeanLambdaBase<Re
     super(requestType, BeanLambdaConfiguration.fromConsumerConfiguration(configuration));
   }
 
-  /**
-   * hook
-   */
-  protected void completeInitialization(Context context) {}
-
   @Override
   public final Void handleRequest(RequestT originalRequest, Context context) {
     if (isInitialized() == false) {

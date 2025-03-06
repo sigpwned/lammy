@@ -90,11 +90,6 @@ public abstract class BeanLambdaFunctionBase<RequestT, ResponseT>
     }
   }
 
-  /**
-   * hook
-   */
-  protected void completeInitialization(Context context) {}
-
   @Override
   public final ResponseT handleRequest(RequestT originalRequest, Context context) {
     if (isInitialized() == false) {

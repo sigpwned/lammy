@@ -21,25 +21,11 @@ package com.sigwned.lammy.core.base.streamedbean;
 
 import java.util.Objects;
 
-/* default */ class StreamedBeanLambdaConfiguration {
-  public static StreamedBeanLambdaConfiguration fromFunctionConfiguration(
-      StreamedBeanLambdaFunctionConfiguration functionConfiguration) {
-    return new StreamedBeanLambdaConfiguration()
-        .withAutoloadInputInterceptors(functionConfiguration.getAutoloadInputInterceptors())
-        .withAutoloadRequestFilters(functionConfiguration.getAutoloadRequestFilters());
-  }
-
-  public static StreamedBeanLambdaConfiguration fromConsumerConfiguration(
-      StreamedBeanLambdaConsumerConfiguration consumerConfiguration) {
-    return new StreamedBeanLambdaConfiguration()
-        .withAutoloadInputInterceptors(consumerConfiguration.getAutoloadInputInterceptors())
-        .withAutoloadRequestFilters(consumerConfiguration.getAutoloadRequestFilters());
-  }
-
+public class StreamedBeanLambdaConsumerConfiguration {
   private Boolean autoloadInputInterceptors;
   private Boolean autoloadRequestFilters;
 
-  public StreamedBeanLambdaConfiguration() {}
+  public StreamedBeanLambdaConsumerConfiguration() {}
 
   public Boolean getAutoloadInputInterceptors() {
     return autoloadInputInterceptors;
@@ -49,7 +35,7 @@ import java.util.Objects;
     this.autoloadInputInterceptors = autoloadInputInterceptors;
   }
 
-  public StreamedBeanLambdaConfiguration withAutoloadInputInterceptors(
+  public StreamedBeanLambdaConsumerConfiguration withAutoloadInputInterceptors(
       Boolean autoloadInputInterceptors) {
     this.autoloadInputInterceptors = autoloadInputInterceptors;
     return this;
@@ -63,7 +49,7 @@ import java.util.Objects;
     this.autoloadRequestFilters = autoloadRequestFilters;
   }
 
-  public StreamedBeanLambdaConfiguration withAutoloadRequestFilters(
+  public StreamedBeanLambdaConsumerConfiguration withAutoloadRequestFilters(
       Boolean autoloadRequestFilters) {
     this.autoloadRequestFilters = autoloadRequestFilters;
     return this;
@@ -82,16 +68,14 @@ import java.util.Objects;
       return false;
     if (getClass() != obj.getClass())
       return false;
-    StreamedBeanLambdaConfiguration other = (StreamedBeanLambdaConfiguration) obj;
+    StreamedBeanLambdaConsumerConfiguration other = (StreamedBeanLambdaConsumerConfiguration) obj;
     return Objects.equals(autoloadInputInterceptors, other.autoloadInputInterceptors)
         && Objects.equals(autoloadRequestFilters, other.autoloadRequestFilters);
   }
 
   @Override
   public String toString() {
-    return "StreamedBeanLambdaConfiguration [autoloadInputInterceptors=" + autoloadInputInterceptors
-        + ", autoloadRequestFilters=" + autoloadRequestFilters + "]";
+    return "StreamedBeanLambdaConsumerConfiguration [autoloadInputInterceptors="
+        + autoloadInputInterceptors + ", autoloadRequestFilters=" + autoloadRequestFilters + "]";
   }
-
-
 }

@@ -25,6 +25,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
+import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.sigwned.lammy.core.base.LambdaFunctionBase;
 import com.sigwned.lammy.core.model.bean.ExceptionMapper;
@@ -93,4 +94,9 @@ import com.sigwned.lammy.core.util.MoreObjects;
   }
 
   protected abstract boolean isInitialized();
+
+  /**
+   * hook
+   */
+  protected void completeInitialization(Context context) {}
 }

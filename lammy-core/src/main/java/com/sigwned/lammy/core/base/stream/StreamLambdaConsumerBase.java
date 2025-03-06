@@ -34,11 +34,6 @@ public abstract class StreamLambdaConsumerBase extends StreamLambdaBase {
     super(StreamLambdaConfiguration.fromConsumerConfiguration(configuration));
   }
 
-  /**
-   * hook
-   */
-  protected void completeInitialization(Context context) {}
-
   @Override
   public void handleRequest(InputStream originalInputStream, OutputStream originalOutputStream,
       Context context) throws IOException {

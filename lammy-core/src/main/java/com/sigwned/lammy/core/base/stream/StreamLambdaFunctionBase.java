@@ -67,11 +67,6 @@ public abstract class StreamLambdaFunctionBase extends StreamLambdaBase {
     }
   }
 
-  /**
-   * hook
-   */
-  protected void completeInitialization(Context context) {}
-
   @Override
   public final void handleRequest(InputStream originalInputStream,
       OutputStream originalOutputStream, Context context) throws IOException {

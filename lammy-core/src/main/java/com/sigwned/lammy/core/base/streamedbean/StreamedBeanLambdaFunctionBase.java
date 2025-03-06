@@ -19,6 +19,7 @@
  */
 package com.sigwned.lammy.core.base.streamedbean;
 
+import static java.util.Collections.unmodifiableList;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,7 +30,6 @@ import java.util.ServiceLoader;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.CustomPojoSerializer;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.sigwned.lammy.core.base.LambdaFunctionBase;
 import com.sigwned.lammy.core.io.CountingOutputStream;
 import com.sigwned.lammy.core.io.NonClosingInputStream;
 import com.sigwned.lammy.core.io.NonClosingOutputStream;
@@ -42,8 +42,6 @@ import com.sigwned.lammy.core.model.stream.InputContext;
 import com.sigwned.lammy.core.model.stream.InputInterceptor;
 import com.sigwned.lammy.core.model.stream.OutputContext;
 import com.sigwned.lammy.core.model.stream.OutputInterceptor;
-import com.sigwned.lammy.core.serialization.PlatformCustomPojoSerializer;
-import com.sigwned.lammy.core.util.CustomPojoSerializers;
 import com.sigwned.lammy.core.util.ExceptionMappers;
 import com.sigwned.lammy.core.util.GenericTypes;
 import com.sigwned.lammy.core.util.MoreObjects;
@@ -51,56 +49,44 @@ import com.sigwned.lammy.core.util.MoreObjects;
 /**
  * A basic implementation of a Lambda function that handles streaming input and output.
  */
-public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT> extends LambdaFunctionBase
-    implements RequestStreamHandler {
-  private CustomPojoSerializer serializer;
-  private final Type requestType;
+public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT>
+    extends StreamedBeanLambdaBase<RequestT, ResponseT> implements RequestStreamHandler {
   private final Type responseType;
-  private final List<InputInterceptor> inputInterceptors;
-  private final List<RequestFilter<RequestT>> requestFilters;
   private final List<OutputInterceptor> outputInterceptors;
   private final List<ResponseFilter<RequestT, ResponseT>> responseFilters;
   private final List<ExceptionMapper<?, ResponseT>> exceptionMappers;
-  private boolean initialized;
+  boolean initialized;
 
   protected StreamedBeanLambdaFunctionBase() {
-    this(new StreamedBeanLambdaConfiguration());
+    this(new StreamedBeanLambdaFunctionConfiguration());
   }
 
-  protected StreamedBeanLambdaFunctionBase(StreamedBeanLambdaConfiguration configuration) {
+  protected StreamedBeanLambdaFunctionBase(StreamedBeanLambdaFunctionConfiguration configuration) {
     this(null, null, null, configuration);
   }
 
   protected StreamedBeanLambdaFunctionBase(CustomPojoSerializer serializer) {
-    this(serializer, new StreamedBeanLambdaConfiguration());
+    this(serializer, new StreamedBeanLambdaFunctionConfiguration());
   }
 
   protected StreamedBeanLambdaFunctionBase(CustomPojoSerializer serializer,
-      StreamedBeanLambdaConfiguration configuration) {
+      StreamedBeanLambdaFunctionConfiguration configuration) {
     this(serializer, null, null, configuration);
   }
 
   protected StreamedBeanLambdaFunctionBase(Type requestType, Type responseType) {
-    this(requestType, responseType, new StreamedBeanLambdaConfiguration());
+    this(requestType, responseType, new StreamedBeanLambdaFunctionConfiguration());
   }
 
-
   protected StreamedBeanLambdaFunctionBase(Type requestType, Type responseType,
-      StreamedBeanLambdaConfiguration configuration) {
+      StreamedBeanLambdaFunctionConfiguration configuration) {
     this(null, requestType, responseType, configuration);
   }
 
   protected StreamedBeanLambdaFunctionBase(CustomPojoSerializer serializer, Type requestType,
-      Type responseType, StreamedBeanLambdaConfiguration configuration) {
-    if (serializer == null)
-      serializer = CustomPojoSerializers.loadSerializer();
-    this.serializer = serializer;
-
-    if (requestType == null)
-      requestType = GenericTypes
-          .findGenericParameter(getClass(), StreamedBeanLambdaFunctionBase.class, 0)
-          .orElseThrow(() -> new AssertionError("Failed to compute requestType for " + getClass()));
-    this.requestType = requestType;
+      Type responseType, StreamedBeanLambdaFunctionConfiguration configuration) {
+    super(serializer, requestType,
+        StreamedBeanLambdaConfiguration.fromFunctionConfiguration(configuration));
 
     if (responseType == null)
       responseType = GenericTypes
@@ -108,55 +94,36 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT> extend
               () -> new AssertionError("Failed to compute responseType for " + getClass()));
     this.responseType = responseType;
 
-    inputInterceptors = new ArrayList<>();
-    if (MoreObjects.coalesce(configuration.getAutoloadInputInterceptors(), AUTOLOAD_ALL)
-        .orElse(false)) {
-      ServiceLoader.load(InputInterceptor.class).iterator()
-          .forEachRemaining(inputInterceptors::add);
-    }
-
     outputInterceptors = new ArrayList<>();
     if (MoreObjects.coalesce(configuration.getAutoloadOutputInterceptors(), AUTOLOAD_ALL)
         .orElse(false)) {
       ServiceLoader.load(OutputInterceptor.class).iterator()
-          .forEachRemaining(outputInterceptors::add);
-    }
-
-    requestFilters = new ArrayList<>();
-    if (MoreObjects.coalesce(configuration.getAutoloadRequestFilters(), AUTOLOAD_ALL)
-        .orElse(false)) {
-      ServiceLoader.load(RequestFilter.class).iterator().forEachRemaining(requestFilters::add);
+          .forEachRemaining(this::registerOutputInterceptor);
     }
 
     responseFilters = new ArrayList<>();
     if (MoreObjects.coalesce(configuration.getAutoloadResponseFilters(), AUTOLOAD_ALL)
         .orElse(false)) {
-      ServiceLoader.load(ResponseFilter.class).iterator().forEachRemaining(responseFilters::add);
+      ServiceLoader.load(ResponseFilter.class).iterator()
+          .forEachRemaining(this::registerResponseFilter);
     }
 
     exceptionMappers = new ArrayList<>();
     if (MoreObjects.coalesce(configuration.getAutoloadExceptionMappers(), AUTOLOAD_ALL)
         .orElse(false)) {
-      ServiceLoader.load(ExceptionMapper.class).iterator().forEachRemaining(exceptionMappers::add);
+      ServiceLoader.load(ExceptionMapper.class).iterator()
+          .forEachRemaining(this::registerExceptionMapper);
     }
-  }
-
-  /**
-   * hook
-   */
-  protected void completeInitialization(Context context) {
-    if (serializer == null)
-      serializer = PlatformCustomPojoSerializer.forContext(context, requestType);
   }
 
   @Override
   public final void handleRequest(InputStream originalInputStream,
       OutputStream originalOutputStream, Context context) throws IOException {
-    if (initialized == false) {
+    if (isInitialized() == false) {
       try {
         completeInitialization(context);
       } finally {
-        initialized = true;
+        setInitialized(true);
       }
     }
 
@@ -168,7 +135,8 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT> extend
     try (final InputStream preparedInputStream = prepareInput(inputContext, context);
         final OutputStream preparedOutputStream =
             prepareOutput(inputContext, outputContext, context)) {
-      final RequestT originalRequest = serializer.fromJson(preparedInputStream, requestType);
+      final RequestT originalRequest =
+          getSerializer().fromJson(preparedInputStream, getRequestType());
       final RequestContext<RequestT> requestContext = new DefaultRequestContext<>(originalRequest);
 
       ResponseT preparedResponse;
@@ -191,12 +159,13 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT> extend
         // Otherwise, try to find an exception writer that can handle this exception. If we don't
         // find one, then propagate the exception.
         final ExceptionMapper<? extends Exception, ResponseT> exceptionMapper =
-            ExceptionMappers.findExceptionMapperForException(exceptionMappers, e).orElse(null);
+            ExceptionMappers.findExceptionMapperForException(getExceptionMappers(), e).orElse(null);
         if (exceptionMapper == null)
           throw e;
 
         try {
-          final ResponseT originalError = exceptionMapper.mapExceptionTo(e, responseType, context);
+          final ResponseT originalError =
+              exceptionMapper.mapExceptionTo(e, getResponseType(), context);
           final ResponseContext<ResponseT> errorContext =
               new DefaultResponseContext<>(originalError);
           preparedResponse = prepareResponse(requestContext, errorContext, context);
@@ -205,15 +174,11 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT> extend
         }
       }
 
-      serializer.toJson(preparedResponse, preparedOutputStream, responseType);
+      getSerializer().toJson(preparedResponse, preparedOutputStream, responseType);
     }
   }
 
   public abstract ResponseT handleStreamedBeanRequest(RequestT request, Context context);
-
-  public Type getRequestType() {
-    return requestType;
-  }
 
   public Type getResponseType() {
     return responseType;
@@ -229,7 +194,7 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT> extend
     InputStream result = null;
 
     try {
-      for (InputInterceptor requestInterceptor : inputInterceptors) {
+      for (InputInterceptor requestInterceptor : getInputInterceptors()) {
         requestInterceptor.interceptRequest(streamingRequestContext, lambdaContext);
       }
       result = streamingRequestContext.getInputStream();
@@ -239,14 +204,6 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT> extend
     }
 
     return result;
-  }
-
-  protected void registerInputInterceptor(InputInterceptor inputInterceptor) {
-    if (inputInterceptor == null)
-      throw new NullPointerException();
-    if (initialized == true)
-      throw new IllegalStateException("initialized");
-    inputInterceptors.add(inputInterceptor);
   }
 
   /**
@@ -280,18 +237,14 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT> extend
     outputInterceptors.add(outputInterceptor);
   }
 
-  private RequestT prepareRequest(RequestContext<RequestT> requestContext, Context lambdaContext) {
-    for (RequestFilter<RequestT> requestFilter : requestFilters)
-      requestFilter.filterRequest(requestContext, lambdaContext);
-    return requestContext.getInputValue();
+  protected List<OutputInterceptor> getOutputInterceptors() {
+    return unmodifiableList(outputInterceptors);
   }
 
-  protected void registerRequestFilter(RequestFilter<RequestT> requestFilter) {
-    if (requestFilter == null)
-      throw new NullPointerException();
-    if (initialized)
-      throw new IllegalStateException();
-    requestFilters.add(requestFilter);
+  private RequestT prepareRequest(RequestContext<RequestT> requestContext, Context lambdaContext) {
+    for (RequestFilter<RequestT> requestFilter : getRequestFilters())
+      requestFilter.filterRequest(requestContext, lambdaContext);
+    return requestContext.getInputValue();
   }
 
   private ResponseT prepareResponse(RequestContext<RequestT> requestContext,
@@ -301,10 +254,14 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT> extend
     return responseContext.getOutputValue();
   }
 
+  protected List<ResponseFilter<RequestT, ResponseT>> getResponseFilters() {
+    return unmodifiableList(responseFilters);
+  }
+
   protected void registerResponseFilter(ResponseFilter<RequestT, ResponseT> responseFilter) {
     if (responseFilter == null)
       throw new NullPointerException();
-    if (initialized)
+    if (isInitialized())
       throw new IllegalStateException();
     responseFilters.add(responseFilter);
   }
@@ -313,7 +270,7 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT> extend
       ExceptionMapper<E, ResponseT> exceptionMapper) {
     if (exceptionMapper == null)
       throw new NullPointerException();
-    if (initialized)
+    if (isInitialized())
       throw new IllegalStateException();
 
     // Just test that it's possible.
@@ -324,5 +281,20 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT> extend
     // TODO Should we test for response type equivalence? Should we extract response type at all?
 
     exceptionMappers.add(exceptionMapper);
+  }
+
+  protected List<ExceptionMapper<?, ResponseT>> getExceptionMappers() {
+    return unmodifiableList(exceptionMappers);
+  }
+
+  @Override
+  protected boolean isInitialized() {
+    return initialized;
+  }
+
+  private void setInitialized(boolean initialized) {
+    if (initialized == false && this.initialized == true)
+      throw new IllegalStateException("already initialized");
+    this.initialized = initialized;
   }
 }
