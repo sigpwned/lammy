@@ -1,4 +1,4 @@
-package com.sigpwned.lammy.jackson;
+package com.sigpwned.lammy.serialization.jackson;
 
 import java.io.IOException;
 import java.io.InputStream;
