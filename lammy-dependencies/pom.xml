@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.sigpwned</groupId>
@@ -11,7 +13,7 @@
     <description>
         All dependencies for all lammy modules. Includes lambda runtime
         dependencies.
-        
+
         See: https://docs.aws.amazon.com/lambda/latest/dg/lambda-java.html
     </description>
     <packaging>pom</packaging>
@@ -20,6 +22,8 @@
         <aws-lambda-java-core.version>1.2.3</aws-lambda-java-core.version>
         <aws-lambda-java-events.version>3.11.3</aws-lambda-java-events.version>
         <aws-lambda-java-log4j2.version>1.5.1</aws-lambda-java-log4j2.version>
+        <aws-lambda-java-serialization.version>1.1.5</aws-lambda-java-serialization.version>
+        <slf4j.version>2.0.9</slf4j.version>
         <log4j2.version>2.17.1</log4j2.version>
         <jackson.version>2.15.3</jackson.version>
     </properties>
@@ -42,6 +46,11 @@
             </dependency>
             <dependency>
                 <groupId>com.amazonaws</groupId>
+                <artifactId>aws-lambda-java-serialization</artifactId>
+                <version>${aws-lambda-java-serialization.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
                 <artifactId>aws-lambda-java-log4j2</artifactId>
                 <version>${aws-lambda-java-log4j2.version}</version>
             </dependency>
@@ -49,6 +58,13 @@
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-bom</artifactId>
                 <version>${log4j2.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-bom</artifactId>
+                <version>${slf4j.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>

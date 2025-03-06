@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,109 +19,163 @@
  */
 package com.sigwned.lammy.core.stream;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import org.crac.Resource;
+import java.util.ServiceLoader;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.sigwned.lammy.core.ExceptionMapper;
 import com.sigwned.lammy.core.LambdaFunctionBase;
-import com.sigwned.lammy.core.util.ByteStreams;
+import com.sigwned.lammy.core.io.CountingOutputStream;
+import com.sigwned.lammy.core.io.NonClosingInputStream;
+import com.sigwned.lammy.core.io.NonClosingOutputStream;
+import com.sigwned.lammy.core.util.MoreObjects;
 
+/**
+ * A basic implementation of a Lambda function that handles streaming input and output.
+ */
 public abstract class StreamLambdaFunctionBase extends LambdaFunctionBase
     implements RequestStreamHandler {
-  private final List<StreamLambdaRequestInterceptor> requestInterceptors;
-  private final List<StreamLambdaResponseInterceptor> responseInterceptors;
+  private final List<InputInterceptor> inputInterceptors;
+  private final List<OutputInterceptor> outputInterceptors;
+  private final List<ExceptionWriter> exceptionWriters;
+  private boolean initialized;
 
-  public StreamLambdaFunctionBase() {
-    this.requestInterceptors = new ArrayList<>();
-    this.responseInterceptors = new ArrayList<>();
+  protected StreamLambdaFunctionBase() {
+    this(new StreamLambdaConfiguration());
   }
 
-  private void prepareStreamInput(StreamLambdaRequestContext streamingRequestContext,
-      Context lambdaContext) throws IOException {
-    for (StreamLambdaRequestInterceptor requestInterceptor : getRequestInterceptors()) {
-      requestInterceptor.interceptRequest(streamingRequestContext, lambdaContext);
+  protected StreamLambdaFunctionBase(StreamLambdaConfiguration configuration) {
+    inputInterceptors = new ArrayList<>();
+    if (MoreObjects.coalesce(configuration.getAutoloadInputInterceptors(), AUTOLOAD_ALL)
+        .orElse(false)) {
+      ServiceLoader.load(InputInterceptor.class).iterator()
+          .forEachRemaining(inputInterceptors::add);
     }
-  }
 
-  private List<StreamLambdaRequestInterceptor> getRequestInterceptors() {
-    return requestInterceptors;
-  }
-
-  public void registerRequestInterceptor(StreamLambdaRequestInterceptor requestInterceptor) {
-    if (requestInterceptor == null)
-      throw new NullPointerException();
-    getRequestInterceptors().add(requestInterceptor);
-  }
-
-  private void prepareStreamOutput(StreamLambdaRequestContext streamingRequestContext,
-      StreamLambdaResponseContext streamingResponseContext, Context lambdaContext)
-      throws IOException {
-    for (StreamLambdaResponseInterceptor responseInterceptor : getResponseInterceptors()) {
-      responseInterceptor.interceptResponse(streamingRequestContext, streamingResponseContext,
-          lambdaContext);
+    outputInterceptors = new ArrayList<>();
+    if (MoreObjects.coalesce(configuration.getAutoloadOutputInterceptors(), AUTOLOAD_ALL)
+        .orElse(false)) {
+      ServiceLoader.load(OutputInterceptor.class).iterator()
+          .forEachRemaining(outputInterceptors::add);
     }
-  }
 
-  private List<StreamLambdaResponseInterceptor> getResponseInterceptors() {
-    return responseInterceptors;
-  }
-
-  public void registerResponseInterceptor(StreamLambdaResponseInterceptor responseInterceptor) {
-    if (responseInterceptor == null)
-      throw new NullPointerException();
-    getResponseInterceptors().add(responseInterceptor);
+    exceptionWriters = new ArrayList<>();
+    if (MoreObjects.coalesce(configuration.getAutoloadExceptionWriters(), AUTOLOAD_ALL)
+        .orElse(false)) {
+      ServiceLoader.load(ExceptionWriter.class).iterator().forEachRemaining(exceptionWriters::add);
+    }
   }
 
   @Override
-  public void handleRequest(InputStream lambdaInputStream, OutputStream lambdaOutputStream,
-      Context context) throws IOException {
-    byte[] requestBytes = ByteStreams.toByteArray(lambdaInputStream);
+  public final void handleRequest(InputStream originalInputStream,
+      OutputStream originalOutputStream, Context context) throws IOException {
+    initialized = true;
 
-    final StreamLambdaRequestContext requestContext =
-        new DefaultStreamLambdaRequestContext(new ByteArrayInputStream(requestBytes));
-
-    final StreamLambdaResponseContext responseContext =
-        new DefaultStreamLambdaResponseContext(lambdaOutputStream);
-
-    byte[] responseBytes;
+    CountingOutputStream countingOutputStream = null;
     try {
-      prepareStreamInput(requestContext, context);
-
-      ByteArrayOutputStream bufferOutputStream = new ByteArrayOutputStream();
-      handleRequest(requestContext.getInputStream(), bufferOutputStream, context);
-      responseBytes = bufferOutputStream.toByteArray();
-
-      prepareStreamOutput(requestContext, responseContext, context);
+      final InputContext requestContext =
+          new DefaultInputContext(new NonClosingInputStream(originalInputStream));
+      final OutputContext responseContext =
+          new DefaultOutputContext(new NonClosingOutputStream(originalOutputStream));
+      try (final InputStream preparedInputStream = prepareInput(requestContext, context);
+          final OutputStream preparedOutputStream =
+              prepareOutput(requestContext, responseContext, context)) {
+        countingOutputStream = new CountingOutputStream(preparedOutputStream);
+        handleStreamingRequest(preparedInputStream, countingOutputStream, context);
+      }
     } catch (Exception e) {
-      Optional<ExceptionMapper<? super Exception>> maybeExceptionMapper =
-          findExceptionMapperForException(e);
-      if (!maybeExceptionMapper.isPresent())
+      // If we're already committed, then just propagate. We can't come back from that.
+      if (countingOutputStream != null && countingOutputStream.getCount() > 0)
         throw e;
 
-      ByteArrayOutputStream bufferOutputStream = new ByteArrayOutputStream();
-      maybeExceptionMapper.get().writeExceptionTo(e, bufferOutputStream);
-      responseBytes = bufferOutputStream.toByteArray();
+      // Otherwise, try to find an exception writer that can handle this exception. If we don't
+      // find one, then propagate the exception.
+      final ExceptionWriter exceptionWriter = exceptionWriters.stream()
+          .filter(writer -> writer.canWriteException(e)).findFirst().orElse(null);
+      if (exceptionWriter == null)
+        throw e;
 
-      prepareStreamOutput(requestContext, responseContext, context);
+      try {
+        exceptionWriter.writeExceptionTo(e, countingOutputStream, context);
+      } catch (Exception e2) {
+        // Well, we're just having a bad time, aren't we? Propagate the original exception.
+        throw e;
+      }
     }
-
-    responseContext.getOutputStream().write(responseBytes);
   }
 
   public abstract void handleStreamingRequest(InputStream inputStream, OutputStream outputStream,
       Context context) throws IOException;
 
-  @Override
-  public void beforeCheckpoint(org.crac.Context<? extends Resource> context) throws Exception {}
+  /**
+   * Prepare the input stream for the lambda function using the registered request interceptors.
+   * Returns the prepared input stream. On exception, ensures that the input stream is closed before
+   * propagating the exception.
+   */
+  private InputStream prepareInput(InputContext streamingRequestContext, Context lambdaContext)
+      throws IOException {
+    InputStream result = null;
 
-  @Override
-  public void afterRestore(org.crac.Context<? extends Resource> context) throws Exception {}
+    try {
+      for (InputInterceptor requestInterceptor : inputInterceptors) {
+        requestInterceptor.interceptRequest(streamingRequestContext, lambdaContext);
+      }
+      result = streamingRequestContext.getInputStream();
+    } finally {
+      if (result == null)
+        streamingRequestContext.getInputStream().close();
+    }
+
+    return result;
+  }
+
+  protected void registerInputInterceptor(InputInterceptor inputInterceptor) {
+    if (inputInterceptor == null)
+      throw new NullPointerException();
+    if (initialized == true)
+      throw new IllegalStateException("initialized");
+    inputInterceptors.add(inputInterceptor);
+  }
+
+  /**
+   * Prepare the output stream for the lambda function using the registered response interceptors.
+   * Returns the prepared output stream. On exception, ensures that the output stream is closed
+   * before propagating the exception.
+   */
+  private OutputStream prepareOutput(InputContext streamingRequestContext,
+      OutputContext streamingResponseContext, Context lambdaContext) throws IOException {
+    OutputStream result = null;
+
+    try {
+      for (OutputInterceptor responseInterceptor : outputInterceptors) {
+        responseInterceptor.interceptResponse(streamingRequestContext, streamingResponseContext,
+            lambdaContext);
+      }
+      result = streamingResponseContext.getOutputStream();
+    } finally {
+      if (result == null)
+        streamingResponseContext.getOutputStream().close();
+    }
+
+    return result;
+  }
+
+  protected void registerOutputInterceptor(OutputInterceptor outputInterceptor) {
+    if (outputInterceptor == null)
+      throw new NullPointerException();
+    if (initialized == true)
+      throw new IllegalStateException("initialized");
+    outputInterceptors.add(outputInterceptor);
+  }
+
+  protected void registerExceptionWriter(ExceptionWriter exceptionWriter) {
+    if (exceptionWriter == null)
+      throw new NullPointerException();
+    if (initialized == true)
+      throw new IllegalStateException("initialized");
+    exceptionWriters.add(exceptionWriter);
+  }
 }

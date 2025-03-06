@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -50,25 +52,39 @@
     </build>
 
     <dependencies>
+        <!-- We need this for SnapStart -->
+        <dependency>
+            <groupId>io.github.crac</groupId>
+            <artifactId>org-crac</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <!-- These are all provided by the lambda container: -->
         <!-- https://docs.aws.amazon.com/lambda/latest/dg/lambda-java.html -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-core</artifactId>
-        </dependency>
-        <!-- We need this for SnapStart -->
-        <dependency>
-            <groupId>io.github.crac</groupId>
-            <artifactId>org-crac</artifactId>
+            <scope>provided</scope>
         </dependency>
         <!-- These are provided by the Lambda runtime -->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-events</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-log4j2</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-log4j2</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-serialization</artifactId>
+            <scope>provided</scope>
         </dependency>
         <!-- We need this for fancy reflection. -->
         <!-- Note that it's repackaged, hence why provided is safe. -->
@@ -77,6 +93,20 @@
             <artifactId>geantyref</artifactId>
             <version>1.3.14</version>
             <scope>provided</scope>
+        </dependency>
+        <!-- We use SLF4J+LOG4J2 for logging, per AWS recommendation. -->
+        <!-- Reasons: to capture SDK events, logging levels, etc. -->
+        <!--
+        https://frank-afriat.medium.com/solving-the-java-aws-lambda-logging-problem-305b06df457f -->
+        <!--
+        https://docs.aws.amazon.com/lambda/latest/dg/java-logging.html#java-logging-log4j2 -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
 
         <!-- Testing -->

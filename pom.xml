@@ -61,6 +61,7 @@
         <module>lammy-parent</module>
         <module>lammy-core</module>
         <module>lammy-jackson</module>
+        <module>lammy-hibernate-validation</module>
         <module>lammy-bom</module>
     </modules>
 

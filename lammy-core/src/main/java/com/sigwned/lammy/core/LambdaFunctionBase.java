@@ -19,66 +19,17 @@
  */
 package com.sigwned.lammy.core;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import org.crac.Context;
 import org.crac.Core;
 import org.crac.Resource;
-import com.sigwned.lammy.core.util.GenericTypes;
 
 public abstract class LambdaFunctionBase implements Resource {
-  public static OptionalEnvironmentVariable<String> getenv(String name) {
-    return OptionalEnvironmentVariable.getenv(name);
-  }
+  protected static final Boolean AUTOLOAD_ALL = OptionalEnvironmentVariable
+      .getenv("LAMMY_AUTOLOAD_ALL").map(Boolean::parseBoolean).orElse(null);
 
-  private final Map<Class<?>, ExceptionMapper<?>> exceptionMappers;
-
-  public LambdaFunctionBase() {
+  protected LambdaFunctionBase() {
     // Register ourselves as a CRaC handler for SnapStart
     Core.getGlobalContext().register(this);
-
-    // Handle exception mapping
-    exceptionMappers = new HashMap<>();
-  }
-
-  public <E extends Exception> void registerExceptionMapper(ExceptionMapper<E> exceptionMapper) {
-    @SuppressWarnings("unchecked")
-    Class<? super E> rawExceptionType = (Class<? super E>) GenericTypes
-        .findGenericParameter(exceptionMapper.getClass(), ExceptionMapper.class, 0)
-        .map(GenericTypes::getErasedType).get();
-    registerExceptionMapper(rawExceptionType, exceptionMapper);
-  }
-
-  public <E extends Exception> void registerExceptionMapper(Class<? super E> exceptionType,
-      ExceptionMapper<E> exceptionMapper) {
-    getExceptionMappers().put(exceptionType, exceptionMapper);
-  }
-
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  public <E extends Exception> Optional<ExceptionMapper<? super E>> findExceptionMapperForException(
-      E e) {
-    if (e == null)
-      throw new NullPointerException();
-    return (Optional) Optional.ofNullable(findExceptionMapperForExceptionType(e.getClass()));
-  }
-
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  public <E extends Exception> Optional<ExceptionMapper<? super E>> findExceptionMapperForExceptionType(
-      Class<E> exceptionType) {
-    if (exceptionType == null)
-      throw new NullPointerException();
-    ExceptionMapper<? super E> result = null;
-    for (Class<?> t = exceptionType; t != null; t = t.getSuperclass()) {
-      result = (ExceptionMapper) exceptionMappers.get(exceptionType);
-      if (result != null)
-        break;
-    }
-    return Optional.ofNullable(result);
-  }
-
-  private Map<Class<?>, ExceptionMapper<?>> getExceptionMappers() {
-    return exceptionMappers;
   }
 
   @Override

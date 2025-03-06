@@ -19,113 +19,153 @@
  */
 package com.sigwned.lammy.core.bean;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import static java.util.Objects.requireNonNull;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ServiceLoader;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.sigwned.lammy.core.stream.StreamLambdaFunctionBase;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.sigwned.lammy.core.LambdaFunctionBase;
+import com.sigwned.lammy.core.util.GenericTypes;
+import com.sigwned.lammy.core.util.MoreObjects;
 
-public abstract class BeanLambdaFunctionBase<InputT, OutputT> extends StreamLambdaFunctionBase {
-  private BeanReader<InputT> beanReader;
-  private BeanWriter<OutputT> beanWriter;
-  private final List<BeanLambdaRequestFilter<InputT>> requestFilters;
-  private final List<BeanLambdaResponseFilter<InputT, OutputT>> responseFilters;
+public abstract class BeanLambdaFunctionBase<RequestT, ResponseT> extends LambdaFunctionBase
+    implements RequestHandler<RequestT, ResponseT> {
+  private final Type requestType;
+  private final Type responseType;
+  private List<RequestFilter<RequestT>> requestFilters;
+  private List<ResponseFilter<RequestT, ResponseT>> responseFilters;
+  private List<ExceptionMapper> exceptionMappers;
+  private boolean initialized;
 
   protected BeanLambdaFunctionBase() {
-    this.requestFilters = new ArrayList<>();
-    this.responseFilters = new ArrayList<>();
+    this(new BeanLambdaConfiguration());
   }
 
-  public BeanLambdaFunctionBase(BeanReader<InputT> beanReader, BeanWriter<OutputT> beanWriter) {
-    if (beanReader == null)
-      throw new NullPointerException();
-    if (beanWriter == null)
-      throw new NullPointerException();
-    this.beanReader = beanReader;
-    this.beanWriter = beanWriter;
-    this.requestFilters = new ArrayList<>();
-    this.responseFilters = new ArrayList<>();
+  protected BeanLambdaFunctionBase(BeanLambdaConfiguration configuration) {
+    this.requestType =
+        GenericTypes.findGenericParameter(getClass(), BeanLambdaFunctionBase.class, 0).orElseThrow(
+            () -> new AssertionError("Failed to compute requestType for " + getClass()));
+    this.responseType =
+        GenericTypes.findGenericParameter(getClass(), BeanLambdaFunctionBase.class, 1).orElseThrow(
+            () -> new AssertionError("Failed to compute responseType for " + getClass()));
+    initialize(configuration);
+  }
+
+  protected BeanLambdaFunctionBase(Type requestType, Type responseType) {
+    this(requestType, responseType, new BeanLambdaConfiguration());
+  }
+
+  protected BeanLambdaFunctionBase(Type requestType, Type responseType,
+      BeanLambdaConfiguration configuration) {
+    this.requestType = requireNonNull(requestType);
+    this.responseType = requireNonNull(responseType);
+    initialize(configuration);
+  }
+
+  private void initialize(BeanLambdaConfiguration configuration) {
+    requestFilters = new ArrayList<>();
+    if (MoreObjects.coalesce(configuration.getAutoloadRequestFilters(), AUTOLOAD_ALL)
+        .orElse(false)) {
+      ServiceLoader.load(RequestFilter.class).iterator().forEachRemaining(requestFilters::add);
+    }
+
+    responseFilters = new ArrayList<>();
+    if (MoreObjects.coalesce(configuration.getAutoloadResponseFilters(), AUTOLOAD_ALL)
+        .orElse(false)) {
+      ServiceLoader.load(ResponseFilter.class).iterator().forEachRemaining(responseFilters::add);
+    }
+
+    exceptionMappers = new ArrayList<>();
+    if (MoreObjects.coalesce(configuration.getAutoloadExceptionMappers(), AUTOLOAD_ALL)
+        .orElse(false)) {
+      ServiceLoader.load(ExceptionMapper.class).iterator().forEachRemaining(exceptionMappers::add);
+    }
   }
 
   @Override
-  public void handleStreamingRequest(InputStream inputStream, OutputStream outputStream,
-      Context context) throws IOException {
-    // Pull these up front to trigger any IllegalStateException we might get early
-    final BeanReader<InputT> beanReader = getBeanReader();
-    final BeanWriter<OutputT> beanWriter = getBeanWriter();
+  @SuppressWarnings("unchecked")
+  public final ResponseT handleRequest(RequestT originalInput, Context context) {
+    initialized = true;
+    try {
+      // Prepare the input bean for the function
+      final RequestContext<RequestT> requestContext = new DefaultRequestContext<>(originalInput);
+      final RequestT preparedInput = prepareRequest(requestContext, context);
 
-    final InputT originalInput = beanReader.readBeanFrom(inputStream);
-    final BeanLambdaRequestContext<InputT> requestContext =
-        new DefaultBeanLambdaRequestContext<>(originalInput);
+      // Run the function to get the output
+      final ResponseT originalOutput = handleBeanRequest(preparedInput, context);
 
-    prepareBeanInput(requestContext, context);
+      // Prepare the output bean for writing
+      final ResponseContext<ResponseT> responseContext =
+          new DefaultResponseContext<>(originalOutput);
+      final ResponseT preparedOutput = prepareResponse(requestContext, responseContext, context);
 
-    final OutputT originalOutput = handleBeanRequest(requestContext.getInputValue(), context);
-    final BeanLambdaResponseContext<OutputT> responseContext =
-        new DefaultBeanLambdaResponseContext<>(originalOutput);
+      // Return the prepared output
+      return preparedOutput;
+    } catch (Exception e) {
+      final ExceptionMapper exceptionMapper = exceptionMappers.stream()
+          .filter(em -> em.canMapException(e, responseType)).findFirst().orElse(null);
+      if (exceptionMapper == null)
+        throw e;
 
-    prepareBeanOutput(requestContext, responseContext, context);
+      final ResponseT mappedException;
+      try {
+        mappedException = (ResponseT) exceptionMapper.mapExceptionTo(e, responseType, context);
+      } catch (Exception e2) {
+        // Propagate the original exception if the mapper fails
+        throw e;
+      }
 
-    beanWriter.writeBeanTo(responseContext.getOutputValue(), outputStream);
+      return mappedException;
+    }
   }
 
-  public abstract OutputT handleBeanRequest(InputT input, Context context) throws IOException;
+  public abstract ResponseT handleBeanRequest(RequestT input, Context context);
 
-  private void prepareBeanInput(BeanLambdaRequestContext<InputT> requestContext,
+  public Type getRequestType() {
+    return requestType;
+  }
+
+  public Type getResponseType() {
+    return responseType;
+  }
+
+  private RequestT prepareRequest(RequestContext<RequestT> requestContext,
       Context lambdaContext) {
-    for (BeanLambdaRequestFilter<InputT> requestFilter : getRequestFilters())
+    for (RequestFilter<RequestT> requestFilter : requestFilters)
       requestFilter.filterRequest(requestContext, lambdaContext);
+    return requestContext.getInputValue();
   }
 
-  private List<BeanLambdaRequestFilter<InputT>> getRequestFilters() {
-    return requestFilters;
+  protected void registerRequestFilter(RequestFilter<RequestT> requestFilter) {
+    if (requestFilter == null)
+      throw new NullPointerException();
+    if (initialized)
+      throw new IllegalStateException();
+    requestFilters.add(requestFilter);
   }
 
-  public void registerBeanRequestFilter(BeanLambdaRequestFilter<InputT> requestFilter) {
-    getRequestFilters().add(requestFilter);
-  }
-
-  private void prepareBeanOutput(BeanLambdaRequestContext<InputT> requestContext,
-      BeanLambdaResponseContext<OutputT> responseContext, Context lambdaContext) {
-    for (BeanLambdaResponseFilter<InputT, OutputT> responseFilter : getResponseFilters())
+  private ResponseT prepareResponse(RequestContext<RequestT> requestContext,
+      ResponseContext<ResponseT> responseContext, Context lambdaContext) {
+    for (ResponseFilter<RequestT, ResponseT> responseFilter : responseFilters)
       responseFilter.filterResponse(requestContext, responseContext, lambdaContext);
+    return responseContext.getOutputValue();
   }
 
-  private List<BeanLambdaResponseFilter<InputT, OutputT>> getResponseFilters() {
-    return responseFilters;
-  }
-
-  public void registerBeanResponseFilter(BeanLambdaResponseFilter<InputT, OutputT> responseFilter) {
-    getResponseFilters().add(responseFilter);
-  }
-
-  protected BeanReader<InputT> getBeanReader() {
-    if (beanReader == null)
-      throw new IllegalStateException("beanReader not set");
-    return beanReader;
-  }
-
-  protected void setBeanReader(BeanReader<InputT> newBeanReader) {
-    if (newBeanReader == null)
+  protected void registerResponseFilter(ResponseFilter<RequestT, ResponseT> responseFilter) {
+    if (responseFilter == null)
       throw new NullPointerException();
-    if (beanReader != null)
-      throw new IllegalStateException("beanReader already set");
-    this.beanReader = newBeanReader;
+    if (initialized)
+      throw new IllegalStateException();
+    responseFilters.add(responseFilter);
   }
 
-  private BeanWriter<OutputT> getBeanWriter() {
-    if (beanWriter == null)
-      throw new IllegalStateException("beanWriter not set");
-    return beanWriter;
-  }
-
-  protected void setBeanWriter(BeanWriter<OutputT> newBeanWriter) {
-    if (newBeanWriter == null)
+  protected void registerExceptionMapper(ExceptionMapper exceptionMapper) {
+    if (exceptionMapper == null)
       throw new NullPointerException();
-    if (beanWriter != null)
-      throw new IllegalStateException("beanWriter already set");
-    this.beanWriter = newBeanWriter;
+    if (initialized)
+      throw new IllegalStateException();
+    exceptionMappers.add(exceptionMapper);
   }
 }

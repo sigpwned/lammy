@@ -29,17 +29,17 @@ import java.util.stream.Stream;
 
 /**
  * Used to support DRY, economical idioms for initializing serverless functions from
- * {@link System#getenv() environment variables}.
+ * {@link System#getProperties() system properties}.
  */
-public class OptionalEnvironmentVariable<T> {
-  public static OptionalEnvironmentVariable<String> getenv(String name) {
-    return new OptionalEnvironmentVariable<String>(name, System.getenv(name));
+public class OptionalSystemProperty<T> {
+  public static OptionalSystemProperty<String> getProperty(String name) {
+    return new OptionalSystemProperty<String>(name, System.getProperty(name));
   }
 
   private final String name;
   private final T value;
 
-  private OptionalEnvironmentVariable(String name, T value) {
+  private OptionalSystemProperty(String name, T value) {
     if (name == null)
       throw new NullPointerException();
     this.name = name;
@@ -58,12 +58,12 @@ public class OptionalEnvironmentVariable<T> {
     return value == null;
   }
 
-  public <X> OptionalEnvironmentVariable<X> map(Function<T, X> f) {
-    return new OptionalEnvironmentVariable<>(getName(), isPresent() ? f.apply(value) : null);
+  public <X> OptionalSystemProperty<X> map(Function<T, X> f) {
+    return new OptionalSystemProperty<>(getName(), isPresent() ? f.apply(value) : null);
   }
 
-  public <X> OptionalEnvironmentVariable<X> flatMap(Function<T, OptionalEnvironmentVariable<X>> f) {
-    return new OptionalEnvironmentVariable<>(getName(),
+  public <X> OptionalSystemProperty<X> flatMap(Function<T, OptionalSystemProperty<X>> f) {
+    return new OptionalSystemProperty<>(getName(),
         isPresent() ? f.apply(value).orElse(null) : null);
   }
 
@@ -71,9 +71,8 @@ public class OptionalEnvironmentVariable<T> {
     return isPresent() ? Stream.of(value) : Stream.empty();
   }
 
-  public OptionalEnvironmentVariable<T> filter(Predicate<T> test) {
-    return new OptionalEnvironmentVariable<>(getName(),
-        isPresent() && test.test(value) ? value : null);
+  public OptionalSystemProperty<T> filter(Predicate<T> test) {
+    return new OptionalSystemProperty<>(getName(), isPresent() && test.test(value) ? value : null);
   }
 
   public void ifPresent(Consumer<? super T> action) {
@@ -89,13 +88,13 @@ public class OptionalEnvironmentVariable<T> {
     }
   }
 
-  public OptionalEnvironmentVariable<T> or(
-      Supplier<? extends OptionalEnvironmentVariable<? extends T>> supplier) {
+  public OptionalSystemProperty<T> or(
+      Supplier<? extends OptionalSystemProperty<? extends T>> supplier) {
     if (isPresent()) {
       return this;
     } else {
       @SuppressWarnings("unchecked")
-      OptionalEnvironmentVariable<T> r = (OptionalEnvironmentVariable<T>) supplier.get();
+      OptionalSystemProperty<T> r = (OptionalSystemProperty<T>) supplier.get();
       return Objects.requireNonNull(r);
     }
   }
@@ -117,7 +116,7 @@ public class OptionalEnvironmentVariable<T> {
 
   public <E extends Exception> T orElseThrow() throws E {
     return orElseThrow(
-        () -> new NoSuchElementException("No value for environment variable " + getName()));
+        () -> new NoSuchElementException("No value for system property " + getName()));
   }
 
   public T get() {
