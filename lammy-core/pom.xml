@@ -80,6 +80,11 @@
             <artifactId>aws-lambda-java-serialization</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-runtime-interface-client</artifactId>
+            <scope>provided</scope>
+        </dependency>
         <!-- We need this for fancy reflection. -->
         <!-- Note that it's repackaged, hence why provided is safe. -->
         <dependency>
