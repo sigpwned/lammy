@@ -21,29 +21,77 @@ package com.sigwned.lammy.core.base.bean;
 
 import java.lang.reflect.Type;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.sigwned.lammy.core.model.bean.RequestContext;
+import com.sigwned.lammy.core.model.bean.RequestFilter;
 
-public abstract class BeanLambdaConsumerBase<InputT> extends BeanLambdaFunctionBase<InputT, Void> {
+/**
+ * A base class for a Lambda function that accepts a bean as input and produces no output. It uses
+ * platform serialization, possibly using a custom serializer as loaded by the platform. It also
+ * supports {@link RequestFilter}s for preprocessing the input.
+ *
+ * @param <RequestT> The type of the input bean
+ *
+ * @see <a href="https://docs.aws.amazon.com/lambda/latest/dg/java-custom-serialization.html">
+ *      https://docs.aws.amazon.com/lambda/latest/dg/java-custom-serialization.html</a>
+ */
+public abstract class BeanLambdaConsumerBase<RequestT> extends BeanLambdaBase<RequestT, Void> {
+  private boolean initialized;
+
   protected BeanLambdaConsumerBase() {
-    this(new BeanLambdaConfiguration());
+    this(new BeanLambdaConsumerConfiguration());
   }
 
-  protected BeanLambdaConsumerBase(BeanLambdaConfiguration configuration) {
-    super(configuration);
+  protected BeanLambdaConsumerBase(BeanLambdaConsumerConfiguration configuration) {
+    this(null, configuration);
   }
 
   protected BeanLambdaConsumerBase(Type requestType) {
-    this(requestType, new BeanLambdaConfiguration());
+    this(requestType, new BeanLambdaConsumerConfiguration());
   }
 
-  protected BeanLambdaConsumerBase(Type requestType, BeanLambdaConfiguration configuration) {
-    super(requestType, Void.class, configuration);
+  protected BeanLambdaConsumerBase(Type requestType,
+      BeanLambdaConsumerConfiguration configuration) {
+    super(requestType, BeanLambdaConfiguration.fromConsumerConfiguration(configuration));
   }
+
+  /**
+   * hook
+   */
+  protected void completeInitialization(Context context) {}
 
   @Override
-  public final Void handleBeanRequest(InputT input, Context context) {
-    consumeBeanRequest(input, context);
+  public final Void handleRequest(RequestT originalRequest, Context context) {
+    if (isInitialized() == false) {
+      try {
+        completeInitialization(context);
+      } finally {
+        setInitialized(true);
+      }
+    }
+
+    final RequestContext<RequestT> requestContext = new DefaultRequestContext<>(originalRequest);
+    final RequestT preparedRequest = prepareRequest(requestContext, context);
+    consumeBeanRequest(preparedRequest, context);
+
     return null;
   }
 
-  public abstract void consumeBeanRequest(InputT input, Context context);
+  public abstract void consumeBeanRequest(RequestT input, Context context);
+
+  private RequestT prepareRequest(RequestContext<RequestT> requestContext, Context lambdaContext) {
+    for (RequestFilter<RequestT> requestFilter : getRequestFilters())
+      requestFilter.filterRequest(requestContext, lambdaContext);
+    return requestContext.getInputValue();
+  }
+
+  @Override
+  protected boolean isInitialized() {
+    return initialized;
+  }
+
+  private void setInitialized(boolean initialized) {
+    if (initialized == false && this.initialized == true)
+      throw new IllegalStateException("already initialized");
+    this.initialized = initialized;
+  }
 }

@@ -19,6 +19,7 @@
  */
 package com.sigwned.lammy.core.base.bean;
 
+import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -26,7 +27,6 @@ import java.util.List;
 import java.util.ServiceLoader;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.sigwned.lammy.core.base.LambdaFunctionBase;
 import com.sigwned.lammy.core.model.bean.ExceptionMapper;
 import com.sigwned.lammy.core.model.bean.RequestContext;
 import com.sigwned.lammy.core.model.bean.RequestFilter;
@@ -36,44 +36,46 @@ import com.sigwned.lammy.core.util.ExceptionMappers;
 import com.sigwned.lammy.core.util.GenericTypes;
 import com.sigwned.lammy.core.util.MoreObjects;
 
-public abstract class BeanLambdaFunctionBase<RequestT, ResponseT> extends LambdaFunctionBase
-    implements RequestHandler<RequestT, ResponseT> {
-  private final Type requestType;
+/**
+ * A base class for a Lambda function that accepts a bean as input and returns a bean as output. It
+ * uses platform serialization, possibly using a custom serializer as loaded by the platform. It
+ * also supports {@link RequestFilter}s and {@link ResponseFilter}s for preprocessing the input and
+ * output, respsectively. It also supports {@link ExceptionMapper}s for mapping exceptions to
+ * responses, if desired.
+ *
+ * @param <RequestT> The type of the input bean
+ * @param <ResponseT> The type of the output bean
+ *
+ * @see <a href="https://docs.aws.amazon.com/lambda/latest/dg/java-custom-serialization.html">
+ *      https://docs.aws.amazon.com/lambda/latest/dg/java-custom-serialization.html</a>
+ */
+public abstract class BeanLambdaFunctionBase<RequestT, ResponseT>
+    extends BeanLambdaBase<RequestT, ResponseT> implements RequestHandler<RequestT, ResponseT> {
   private final Type responseType;
-  private final List<RequestFilter<RequestT>> requestFilters;
   private final List<ResponseFilter<RequestT, ResponseT>> responseFilters;
   private final List<ExceptionMapper<?, ResponseT>> exceptionMappers;
   private boolean initialized;
 
   protected BeanLambdaFunctionBase() {
-    this(new BeanLambdaConfiguration());
+    this(new BeanLambdaFunctionConfiguration());
   }
 
-  protected BeanLambdaFunctionBase(BeanLambdaConfiguration configuration) {
+  protected BeanLambdaFunctionBase(BeanLambdaFunctionConfiguration configuration) {
     this(null, null, configuration);
   }
 
   protected BeanLambdaFunctionBase(Type requestType, Type responseType) {
-    this(requestType, responseType, new BeanLambdaConfiguration());
+    this(requestType, responseType, new BeanLambdaFunctionConfiguration());
   }
 
   protected BeanLambdaFunctionBase(Type requestType, Type responseType,
-      BeanLambdaConfiguration configuration) {
-    if (requestType == null)
-      requestType = GenericTypes.findGenericParameter(getClass(), BeanLambdaFunctionBase.class, 0)
-          .orElseThrow(() -> new IllegalArgumentException("Could not determine request type"));
-    this.requestType = requireNonNull(requestType);
+      BeanLambdaFunctionConfiguration configuration) {
+    super(requestType, BeanLambdaConfiguration.fromFunctionConfiguration(configuration));
 
     if (responseType == null)
       responseType = GenericTypes.findGenericParameter(getClass(), BeanLambdaFunctionBase.class, 1)
           .orElseThrow(() -> new IllegalArgumentException("Could not determine response type"));
     this.responseType = requireNonNull(responseType);
-
-    requestFilters = new ArrayList<>();
-    if (MoreObjects.coalesce(configuration.getAutoloadRequestFilters(), AUTOLOAD_ALL)
-        .orElse(false)) {
-      ServiceLoader.load(RequestFilter.class).iterator().forEachRemaining(requestFilters::add);
-    }
 
     responseFilters = new ArrayList<>();
     if (MoreObjects.coalesce(configuration.getAutoloadResponseFilters(), AUTOLOAD_ALL)
@@ -95,11 +97,11 @@ public abstract class BeanLambdaFunctionBase<RequestT, ResponseT> extends Lambda
 
   @Override
   public final ResponseT handleRequest(RequestT originalRequest, Context context) {
-    if (initialized == false) {
+    if (isInitialized() == false) {
       try {
         completeInitialization(context);
       } finally {
-        initialized = true;
+        setInitialized(true);
       }
     }
 
@@ -119,7 +121,7 @@ public abstract class BeanLambdaFunctionBase<RequestT, ResponseT> extends Lambda
       preparedResponse = prepareResponse(requestContext, responseContext, context);
     } catch (Exception e) {
       final ExceptionMapper<? extends Exception, ResponseT> exceptionMapper =
-          ExceptionMappers.findExceptionMapperForException(exceptionMappers, e).orElse(null);
+          ExceptionMappers.findExceptionMapperForException(getExceptionMappers(), e).orElse(null);
       if (exceptionMapper == null)
         throw e;
 
@@ -138,31 +140,19 @@ public abstract class BeanLambdaFunctionBase<RequestT, ResponseT> extends Lambda
 
   public abstract ResponseT handleBeanRequest(RequestT input, Context context);
 
-  public Type getRequestType() {
-    return requestType;
-  }
-
   public Type getResponseType() {
     return responseType;
   }
 
   private RequestT prepareRequest(RequestContext<RequestT> requestContext, Context lambdaContext) {
-    for (RequestFilter<RequestT> requestFilter : requestFilters)
+    for (RequestFilter<RequestT> requestFilter : getRequestFilters())
       requestFilter.filterRequest(requestContext, lambdaContext);
     return requestContext.getInputValue();
   }
 
-  protected void registerRequestFilter(RequestFilter<RequestT> requestFilter) {
-    if (requestFilter == null)
-      throw new NullPointerException();
-    if (initialized)
-      throw new IllegalStateException();
-    requestFilters.add(requestFilter);
-  }
-
   private ResponseT prepareResponse(RequestContext<RequestT> requestContext,
       ResponseContext<ResponseT> responseContext, Context lambdaContext) {
-    for (ResponseFilter<RequestT, ResponseT> responseFilter : responseFilters)
+    for (ResponseFilter<RequestT, ResponseT> responseFilter : getResponseFilters())
       responseFilter.filterResponse(requestContext, responseContext, lambdaContext);
     return responseContext.getOutputValue();
   }
@@ -170,16 +160,20 @@ public abstract class BeanLambdaFunctionBase<RequestT, ResponseT> extends Lambda
   protected void registerResponseFilter(ResponseFilter<RequestT, ResponseT> responseFilter) {
     if (responseFilter == null)
       throw new NullPointerException();
-    if (initialized)
+    if (isInitialized())
       throw new IllegalStateException();
     responseFilters.add(responseFilter);
+  }
+
+  protected List<ResponseFilter<RequestT, ResponseT>> getResponseFilters() {
+    return unmodifiableList(responseFilters);
   }
 
   protected <E extends Exception> void registerExceptionMapper(
       ExceptionMapper<E, ResponseT> exceptionMapper) {
     if (exceptionMapper == null)
       throw new NullPointerException();
-    if (initialized)
+    if (isInitialized())
       throw new IllegalStateException();
 
     // Just test that it's possible.
@@ -190,5 +184,20 @@ public abstract class BeanLambdaFunctionBase<RequestT, ResponseT> extends Lambda
     // TODO Should we test for response type equivalence? Should we extract response type at all?
 
     exceptionMappers.add(exceptionMapper);
+  }
+
+  protected List<ExceptionMapper<?, ResponseT>> getExceptionMappers() {
+    return unmodifiableList(exceptionMappers);
+  }
+
+  @Override
+  protected boolean isInitialized() {
+    return initialized;
+  }
+
+  private void setInitialized(boolean initialized) {
+    if (initialized == false && this.initialized == true)
+      throw new IllegalStateException("already initialized");
+    this.initialized = initialized;
   }
 }

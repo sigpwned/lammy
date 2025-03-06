@@ -21,20 +21,10 @@ package com.sigwned.lammy.core.base.bean;
 
 import java.util.Objects;
 
-/* default */ class BeanLambdaConfiguration {
-  public static BeanLambdaConfiguration fromFunctionConfiguration(
-      BeanLambdaFunctionConfiguration c) {
-    return new BeanLambdaConfiguration().withAutoloadRequestFilters(c.getAutoloadRequestFilters());
-  }
-
-  public static BeanLambdaConfiguration fromConsumerConfiguration(
-      BeanLambdaConsumerConfiguration c) {
-    return new BeanLambdaConfiguration().withAutoloadRequestFilters(c.getAutoloadRequestFilters());
-  }
-
+public class BeanLambdaConsumerConfiguration {
   private Boolean autoloadRequestFilters;
 
-  public BeanLambdaConfiguration() {}
+  public BeanLambdaConsumerConfiguration() {}
 
   public Boolean getAutoloadRequestFilters() {
     return autoloadRequestFilters;
@@ -44,7 +34,8 @@ import java.util.Objects;
     this.autoloadRequestFilters = autoloadRequestFilters;
   }
 
-  public BeanLambdaConfiguration withAutoloadRequestFilters(Boolean autoloadRequestFilters) {
+  public BeanLambdaConsumerConfiguration withAutoloadRequestFilters(
+      Boolean autoloadRequestFilters) {
     this.autoloadRequestFilters = autoloadRequestFilters;
     return this;
   }
@@ -62,7 +53,7 @@ import java.util.Objects;
       return false;
     if (getClass() != obj.getClass())
       return false;
-    BeanLambdaConfiguration other = (BeanLambdaConfiguration) obj;
+    BeanLambdaConsumerConfiguration other = (BeanLambdaConsumerConfiguration) obj;
     return Objects.equals(autoloadRequestFilters, other.autoloadRequestFilters);
   }
 
