@@ -21,22 +21,10 @@ package com.sigwned.lammy.core.base.stream;
 
 import java.util.Objects;
 
-/* default */ class StreamLambdaConfiguration {
-  public static StreamLambdaConfiguration fromFunctionConfiguration(
-      StreamLambdaFunctionConfiguration c) {
-    return new StreamLambdaConfiguration()
-        .withAutoloadInputInterceptors(c.getAutoloadInputInterceptors());
-  }
-
-  public static StreamLambdaConfiguration fromConsumerConfiguration(
-      StreamLambdaConsumerConfiguration c) {
-    return new StreamLambdaConfiguration()
-        .withAutoloadInputInterceptors(c.getAutoloadInputInterceptors());
-  }
-
+public class StreamLambdaConsumerConfiguration {
   private Boolean autoloadInputInterceptors;
 
-  public StreamLambdaConfiguration() {}
+  public StreamLambdaConsumerConfiguration() {}
 
   public Boolean getAutoloadInputInterceptors() {
     return autoloadInputInterceptors;
@@ -46,7 +34,7 @@ import java.util.Objects;
     this.autoloadInputInterceptors = autoloadInputInterceptors;
   }
 
-  public StreamLambdaConfiguration withAutoloadInputInterceptors(
+  public StreamLambdaConsumerConfiguration withAutoloadInputInterceptors(
       Boolean autoloadInputInterceptors) {
     this.autoloadInputInterceptors = autoloadInputInterceptors;
     return this;
@@ -65,13 +53,13 @@ import java.util.Objects;
       return false;
     if (getClass() != obj.getClass())
       return false;
-    StreamLambdaConfiguration other = (StreamLambdaConfiguration) obj;
+    StreamLambdaConsumerConfiguration other = (StreamLambdaConsumerConfiguration) obj;
     return Objects.equals(autoloadInputInterceptors, other.autoloadInputInterceptors);
   }
 
   @Override
   public String toString() {
-    return "StreamLambdaConfiguration [autoloadInputInterceptors=" + autoloadInputInterceptors
-        + "]";
+    return "StreamLambdaConsumerConfiguration [autoloadInputInterceptors="
+        + autoloadInputInterceptors + "]";
   }
 }
