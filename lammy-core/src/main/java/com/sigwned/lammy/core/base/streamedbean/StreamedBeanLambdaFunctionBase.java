@@ -26,6 +26,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.CustomPojoSerializer;
@@ -42,6 +43,7 @@ import com.sigwned.lammy.core.model.stream.InputContext;
 import com.sigwned.lammy.core.model.stream.InputInterceptor;
 import com.sigwned.lammy.core.model.stream.OutputContext;
 import com.sigwned.lammy.core.model.stream.OutputInterceptor;
+import com.sigwned.lammy.core.serialization.ContextAwareCustomPojoSerializer;
 import com.sigwned.lammy.core.util.ExceptionMappers;
 import com.sigwned.lammy.core.util.GenericTypes;
 import com.sigwned.lammy.core.util.MoreObjects;
@@ -62,7 +64,7 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT>
   }
 
   protected StreamedBeanLambdaFunctionBase(StreamedBeanLambdaFunctionConfiguration configuration) {
-    this(null, null, null, configuration);
+    this((ContextAwareCustomPojoSerializer) null, null, null, configuration);
   }
 
   protected StreamedBeanLambdaFunctionBase(CustomPojoSerializer serializer) {
@@ -80,11 +82,19 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT>
 
   protected StreamedBeanLambdaFunctionBase(Type requestType, Type responseType,
       StreamedBeanLambdaFunctionConfiguration configuration) {
-    this(null, requestType, responseType, configuration);
+    this((ContextAwareCustomPojoSerializer) null, requestType, responseType, configuration);
   }
 
   protected StreamedBeanLambdaFunctionBase(CustomPojoSerializer serializer, Type requestType,
       Type responseType, StreamedBeanLambdaFunctionConfiguration configuration) {
+    this(
+        Optional.ofNullable(serializer)
+            .map(ContextAwareCustomPojoSerializer::fromCustomPojoSerializer).orElse(null),
+        requestType, responseType, configuration);
+  }
+
+  protected StreamedBeanLambdaFunctionBase(ContextAwareCustomPojoSerializer serializer,
+      Type requestType, Type responseType, StreamedBeanLambdaFunctionConfiguration configuration) {
     super(serializer, requestType,
         StreamedBeanLambdaConfiguration.fromFunctionConfiguration(configuration));
 
@@ -136,7 +146,7 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT>
         final OutputStream preparedOutputStream =
             prepareOutput(inputContext, outputContext, context)) {
       final RequestT originalRequest =
-          getSerializer().fromJson(preparedInputStream, getRequestType());
+          getSerializer().fromJson(preparedInputStream, getRequestType(), context);
       final RequestContext<RequestT> requestContext = new DefaultRequestContext<>(originalRequest);
 
       ResponseT preparedResponse;
@@ -174,7 +184,7 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT>
         }
       }
 
-      getSerializer().toJson(preparedResponse, preparedOutputStream, responseType);
+      getSerializer().toJson(preparedResponse, preparedOutputStream, getResponseType(), context);
     }
   }
 

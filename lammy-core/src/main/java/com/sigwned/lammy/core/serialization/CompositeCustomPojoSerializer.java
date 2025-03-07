@@ -23,19 +23,11 @@ import static java.util.Objects.requireNonNull;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
-import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.CustomPojoSerializer;
 
 /**
- * A {@link ContextAwareCustomPojoSerializer} implementation that delegates JSON serialization and
+ * A {@link CustomPojoSerializer} implementation that delegates JSON serialization and
  * deserialization to two separate {@link CustomPojoSerializer} instances.
- *
- * <p>
- * This class uses one underlying serializer to perform deserialization (reading JSON) and another
- * to perform serialization (writing JSON). It also supports context propagation; when
- * {@link #setContext(Context)} is invoked, the context is forwarded to each underlying serializer
- * if they implement {@link ContextAwareCustomPojoSerializer}.
- * </p>
  *
  * <p>
  * This design enables different implementations or configurations for serializing and deserializing
@@ -43,9 +35,8 @@ import com.amazonaws.services.lambda.runtime.CustomPojoSerializer;
  * </p>
  *
  * @see CustomPojoSerializer
- * @see ContextAwareCustomPojoSerializer
  */
-public class CompositeCustomPojoSerializer implements ContextAwareCustomPojoSerializer {
+public class CompositeCustomPojoSerializer implements CustomPojoSerializer {
   private final CustomPojoSerializer serializer;
   private final CustomPojoSerializer deserializer;
 
@@ -100,23 +91,6 @@ public class CompositeCustomPojoSerializer implements ContextAwareCustomPojoSeri
   @Override
   public <T> void toJson(T value, OutputStream output, Type type) {
     getDeserializer().toJson(value, output, type);
-  }
-
-  /**
-   * Sets the context for the underlying serializers that are context-aware.
-   * <p>
-   * If an underlying serializer implements {@link ContextAwareCustomPojoSerializer}, its
-   * {@code setContext} method is invoked with the provided context.
-   * </p>
-   *
-   * @param context the context to be set
-   */
-  @Override
-  public void setContext(Context context) {
-    if (getSerializer() instanceof ContextAwareCustomPojoSerializer)
-      ((ContextAwareCustomPojoSerializer) getSerializer()).setContext(context);
-    if (getDeserializer() instanceof ContextAwareCustomPojoSerializer)
-      ((ContextAwareCustomPojoSerializer) getDeserializer()).setContext(context);
   }
 
   private CustomPojoSerializer getSerializer() {

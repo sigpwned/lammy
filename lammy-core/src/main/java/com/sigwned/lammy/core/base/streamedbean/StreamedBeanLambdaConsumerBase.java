@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
+import java.util.Optional;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.CustomPojoSerializer;
 import com.sigwned.lammy.core.io.NonClosingInputStream;
@@ -30,6 +31,7 @@ import com.sigwned.lammy.core.model.bean.RequestContext;
 import com.sigwned.lammy.core.model.bean.RequestFilter;
 import com.sigwned.lammy.core.model.stream.InputContext;
 import com.sigwned.lammy.core.model.stream.InputInterceptor;
+import com.sigwned.lammy.core.serialization.ContextAwareCustomPojoSerializer;
 
 public abstract class StreamedBeanLambdaConsumerBase<RequestT>
     extends StreamedBeanLambdaBase<RequestT, Void> {
@@ -40,7 +42,7 @@ public abstract class StreamedBeanLambdaConsumerBase<RequestT>
   }
 
   protected StreamedBeanLambdaConsumerBase(StreamedBeanLambdaConsumerConfiguration configuration) {
-    this(null, null, configuration);
+    this((ContextAwareCustomPojoSerializer) null, null, configuration);
   }
 
   protected StreamedBeanLambdaConsumerBase(CustomPojoSerializer serializer) {
@@ -59,11 +61,19 @@ public abstract class StreamedBeanLambdaConsumerBase<RequestT>
 
   protected StreamedBeanLambdaConsumerBase(Type requestType,
       StreamedBeanLambdaConsumerConfiguration configuration) {
-    this(null, requestType, configuration);
+    this((ContextAwareCustomPojoSerializer) null, requestType, configuration);
   }
 
   protected StreamedBeanLambdaConsumerBase(CustomPojoSerializer serializer, Type requestType,
       StreamedBeanLambdaConsumerConfiguration configuration) {
+    this(
+        Optional.ofNullable(serializer)
+            .map(ContextAwareCustomPojoSerializer::fromCustomPojoSerializer).orElse(null),
+        requestType, configuration);
+  }
+
+  protected StreamedBeanLambdaConsumerBase(ContextAwareCustomPojoSerializer serializer,
+      Type requestType, StreamedBeanLambdaConsumerConfiguration configuration) {
     super(serializer, requestType,
         StreamedBeanLambdaConfiguration.fromConsumerConfiguration(configuration));
   }
@@ -83,7 +93,7 @@ public abstract class StreamedBeanLambdaConsumerBase<RequestT>
     final InputContext inputContext = new DefaultInputContext(preparingInputStream);
     try (final InputStream preparedInputStream = prepareInput(inputContext, context)) {
       final RequestT originalRequest =
-          getSerializer().fromJson(preparedInputStream, getRequestType());
+          getSerializer().fromJson(preparedInputStream, getRequestType(), context);
       final RequestContext<RequestT> requestContext = new DefaultRequestContext<>(originalRequest);
       final RequestT preparedRequest = prepareRequest(requestContext, context);
       consumeStreamedBeanRequest(preparedRequest, context);

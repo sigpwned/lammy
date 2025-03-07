@@ -31,9 +31,23 @@ import com.amazonaws.services.lambda.runtime.CustomPojoSerializer;
  * we can use it in our serializers. Just in case there was some serializer that needed it. Like
  * maybe the built-in {@link PlatformCustomPojoSerializer}. Or something. Hypothetically.
  */
-public interface ContextAwareCustomPojoSerializer extends CustomPojoSerializer {
-  /**
-   * Sets the {@link Context lambda context} for this serializer.
-   */
-  public void setContext(Context context);
+public interface ContextAwareCustomPojoSerializer {
+  public static ContextAwareCustomPojoSerializer fromCustomPojoSerializer(
+      CustomPojoSerializer serializer) {
+    return new ContextAwareCustomPojoSerializer() {
+      @Override
+      public <T> T fromJson(InputStream src, Type type, Context context) {
+        return serializer.fromJson(src, type);
+      }
+
+      @Override
+      public <T> void toJson(T src, OutputStream dest, Type type, Context context) {
+        serializer.toJson(src, dest, type);
+      }
+    };
+  }
+
+  public <T> T fromJson(InputStream src, Type type, Context context);
+
+  public <T> void toJson(T src, OutputStream dest, Type type, Context context);
 }

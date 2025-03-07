@@ -23,6 +23,7 @@ import static java.util.Objects.requireNonNull;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import com.amazonaws.services.lambda.runtime.ClientContext;
@@ -70,68 +71,106 @@ public class PlatformCustomPojoSerializer implements ContextAwareCustomPojoSeria
     }
   }
 
-  private Context context;
-  private PojoSerializer delegate;
+  private static class SerializerKey {
+    private final Type type;
+    private final Platform platform;
 
-  public PlatformCustomPojoSerializer() {}
+    public SerializerKey(Type type, Platform platform) {
+      this.type = requireNonNull(type);
+      this.platform = requireNonNull(platform);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(platform, type);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj)
+        return true;
+      if (obj == null)
+        return false;
+      if (getClass() != obj.getClass())
+        return false;
+      SerializerKey other = (SerializerKey) obj;
+      return platform == other.platform && Objects.equals(type, other.type);
+    }
+
+    @Override
+    public String toString() {
+      return "SerializerKey [type=" + type + ", platform=" + platform + "]";
+    }
+  }
+
+  private static final int CACHE_SIZE = 16;
+
+  private final Map<SerializerKey, PojoSerializer> cache;
+
+  public PlatformCustomPojoSerializer() {
+    this.cache = new LinkedHashMap<SerializerKey, PojoSerializer>(CACHE_SIZE) {
+      @Override
+      protected boolean removeEldestEntry(Map.Entry<SerializerKey, PojoSerializer> e) {
+        return size() >= CACHE_SIZE;
+      }
+    };
+  }
+
+  @Override
+  public <T> T fromJson(InputStream input, Type type, Context context) {
+    return (T) getSerializer(type, context).fromJson(input);
+  }
+
+  @Override
+  public <T> void toJson(T value, OutputStream output, Type type, Context context) {
+    getSerializer(type, context).toJson(value, output);
+  }
+
+
+  private PojoSerializer getSerializer(Type type, Context context) {
+    final Platform platform = Platform.fromContext(context);
+    final SerializerKey key = new SerializerKey(type, platform);
+
+    // TODO Do we need to be concerned about thread safety here? Probably not, but just in case...
+    PojoSerializer serializer;
+    synchronized (cache) {
+      serializer = cache.get(key);
+    }
+
+    if (serializer == null) {
+      PojoSerializer newSerializer = newSerializer(type, context);
+
+      PojoSerializer existing;
+      synchronized (cache) {
+        existing = cache.putIfAbsent(key, newSerializer);
+      }
+
+      serializer = existing != null ? existing : newSerializer;
+    }
+
+    return serializer;
+  }
 
   /**
-   * For testing only
+   * test hook
    */
-  /* default */ PlatformCustomPojoSerializer(PojoSerializer<?> delegate) {
-    this.delegate = requireNonNull(delegate);
-  }
-
-  @Override
-  public <T> T fromJson(InputStream input, Type type) {
-    return (T) getDelegate(type).fromJson(input);
-  }
-
-  @Override
-  public <T> T fromJson(String input, Type type) {
-    return (T) getDelegate(type).fromJson(input);
-  }
-
-  @Override
-  public <T> void toJson(T value, OutputStream output, Type type) {
-    getDelegate(type).toJson(value, output);
-  }
-
-  private PojoSerializer getDelegate(Type type) {
+  /* default */ PojoSerializer newSerializer(Type type, Context context) {
     // if serializing a Class that is a Lambda supported event, use Jackson with customizations
     if (type instanceof Class) {
       Class<?> clazz = (Class<?>) type;
       if (LambdaEventSerializers.isLambdaSupportedEvent(clazz.getName())) {
-        return delegate = LambdaEventSerializers.serializerFor(clazz,
+        return LambdaEventSerializers.serializerFor(clazz,
             Thread.currentThread().getContextClassLoader());
       }
     }
 
-    final Platform platform = Platform.fromContext(getContext());
+    final Platform platform = Platform.fromContext(context);
 
     // else platform dependent (Android uses GSON but all other platforms use Jackson)
     if (Objects.requireNonNull(platform) == Platform.ANDROID) {
-      return delegate = GsonFactory.getInstance().getSerializer(type);
+      return GsonFactory.getInstance().getSerializer(type);
     }
 
-    return delegate = JacksonFactory.getInstance().getSerializer(type);
-  }
-
-  @Override
-  public void setContext(Context context) {
-    this.context = context;
-  }
-
-  private Context getContext() {
-    if (context == null) {
-      // This is called when a context-aware serializer is used without being informed of its
-      // context. This happens when the serializer is used INSIDE of the AWS Lambda runtime (e.g.,
-      // in a BeanLambdaFunctionBase) because the context is not available until the function is
-      // called, but the serializer is invoked before the function is called to deserialize the
-      // input for the call. Thus, context-aware serializers should only be used in the context of
-      // an application-serialized Lambda function (e.g., in a StreamedBeanLambdaFunctionBase).
-      throw new IllegalStateException("context not set");
-    }
-    return context;
+    return JacksonFactory.getInstance().getSerializer(type);
   }
 }

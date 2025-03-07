@@ -25,9 +25,9 @@ import static java.util.Collections.unmodifiableList;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.CustomPojoSerializer;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.sigwned.lammy.core.base.LambdaFunctionBase;
 import com.sigwned.lammy.core.model.bean.RequestFilter;
@@ -40,17 +40,19 @@ import com.sigwned.lammy.core.util.MoreObjects;
 
 /* default */ abstract class StreamedBeanLambdaBase<RequestT, ResponseT> extends LambdaFunctionBase
     implements RequestStreamHandler {
-  private CustomPojoSerializer serializer;
+  private final ContextAwareCustomPojoSerializer serializer;
   private final Type requestType;
   private final List<InputInterceptor> inputInterceptors;
   private final List<RequestFilter<RequestT>> requestFilters;
 
-  public StreamedBeanLambdaBase(CustomPojoSerializer serializer, Type requestType,
+  public StreamedBeanLambdaBase(ContextAwareCustomPojoSerializer serializer, Type requestType,
       StreamedBeanLambdaConfiguration configuration) {
     if (serializer == null)
-      serializer = CustomPojoSerializers.loadSerializer();
-    if (serializer != null)
-      setSerializer(serializer);
+      serializer = Optional.ofNullable(CustomPojoSerializers.loadSerializer())
+          .map(ContextAwareCustomPojoSerializer::fromCustomPojoSerializer).orElse(null);
+    if (serializer == null)
+      serializer = new PlatformCustomPojoSerializer();
+    this.serializer = serializer;
 
     if (requestType == null)
       requestType = GenericTypes.findGenericParameter(getClass(), StreamedBeanLambdaBase.class, 0)
@@ -71,22 +73,10 @@ import com.sigwned.lammy.core.util.MoreObjects;
     }
   }
 
-  protected void completeInitialization(Context context) {
-    if (getSerializer() == null)
-      setSerializer(new PlatformCustomPojoSerializer());
+  protected void completeInitialization(Context context) {}
 
-    if (getSerializer() != null && getSerializer() instanceof ContextAwareCustomPojoSerializer)
-      ((ContextAwareCustomPojoSerializer) getSerializer()).setContext(context);
-  }
-
-  protected CustomPojoSerializer getSerializer() {
+  protected ContextAwareCustomPojoSerializer getSerializer() {
     return serializer;
-  }
-
-  private void setSerializer(CustomPojoSerializer serializer) {
-    if (serializer == null)
-      throw new NullPointerException();
-    this.serializer = serializer;
   }
 
   public Type getRequestType() {
