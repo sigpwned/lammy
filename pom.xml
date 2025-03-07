@@ -65,6 +65,7 @@
         <module>lammy-hibernate-validation</module>
         <module>lammy-bom</module>
         <module>lammy-lambda-bom</module>
+        <module>lammy-lambda-parent</module>
     </modules>
 
     <!-- For releasing to maven central -->
