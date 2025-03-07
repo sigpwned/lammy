@@ -36,10 +36,11 @@ public class LambdaIntegrationTest extends LammyTestBase {
     final JavaFileObject handler = prepareSourceFile("package com.example;\n" + "\n"
         + "import com.amazonaws.services.lambda.runtime.Context;\n"
         + "import com.amazonaws.services.lambda.runtime.RequestHandler;\n"
+        + "import com.sigpwned.lammy.core.base.bean.BeanLambdaFunctionBase;\n"
         + "import java.util.Map;\n" + "\n"
-        + "public class HelloLambda implements RequestHandler<Map<String, Object>, String> {\n"
+        + "public class HelloLambda extends BeanLambdaFunctionBase<Map<String, Object>, String> {\n"
         + "    @Override\n"
-        + "    public String handleRequest(Map<String, Object> input, Context context) {\n"
+        + "    public String handleBeanRequest(Map<String, Object> input, Context context) {\n"
         + "        String name = input.get(\"name\") != null ? input.get(\"name\").toString() : \"world\";\n"
         + "        return \"Hello, \" + name + \"!\";\n" + "    }\n" + "}\n");
 
@@ -53,10 +54,14 @@ public class LambdaIntegrationTest extends LammyTestBase {
       // Make sure our JAR file doesn't contain any amazon classes. All that stuff is provided by
       // the Lambda environment. We don't want it in our JARs.
       try (JarFile deploymentPackageJar = new JarFile(deploymentPackage)) {
-        assertThat(deploymentPackageJar.stream()).map(JarEntry::getName)
-            .noneMatch(name -> name.startsWith("software/amazonaws/"));
-        assertThat(deploymentPackageJar.stream()).map(JarEntry::getName)
-            .noneMatch(name -> name.startsWith("com/amazon/"));
+        // Here, we're looking for a few specific entries in the JAR file:
+        // - META-INF/ -- various and sundry metadata, which is all fine
+        // - com/sigpwned/lammy/ -- the lammy prefix
+        // - com/example/ -- this exmaple lambda function
+        // - org/crac/ -- the Coordinated Restore at Checkpoint library
+        assertThat(deploymentPackageJar.stream()).map(JarEntry::getName).allMatch(
+            name -> name.startsWith("com/sigpwned/lammy/") || name.startsWith("com/example/")
+                || name.startsWith("org/crac/") || name.startsWith("META-INF/"));
       }
 
       final String functionName = doDeployLambdaFunction(deploymentPackage);

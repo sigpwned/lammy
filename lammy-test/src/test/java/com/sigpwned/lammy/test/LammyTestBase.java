@@ -33,9 +33,9 @@ import org.testcontainers.utility.DockerImageName;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.Compiler;
 import com.google.testing.compile.JavaFileObjects;
+import com.sigpwned.lammy.core.model.OptionalSystemProperty;
 import com.sigpwned.lammy.test.util.Matchers;
 import com.sigpwned.lammy.test.util.Maven;
-import com.sigwned.lammy.core.model.OptionalSystemProperty;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
@@ -234,6 +234,10 @@ public abstract class LammyTestBase {
     // We want the lammy-core module
     result.add(findJarInBuild("lammy-core"));
 
+    // We want the crac module
+    result.add(Maven.findJarInLocalRepository("io.github.crac", "org-crac", CRAC_VERSION));
+
+
     // Extract the compiled files into a temporary directory.
     final Path tmpdir = Files.createTempDirectory("test");
     for (JavaFileObject file : compilation.generatedFiles()) {
@@ -279,6 +283,9 @@ public abstract class LammyTestBase {
   private static final String AWS_LAMBDA_JAVA_CORE_VERSION =
       OptionalSystemProperty.getProperty("maven.aws-lambda-java-core.version").orElseThrow();
 
+  private static final String CRAC_VERSION =
+      OptionalSystemProperty.getProperty("maven.crac.version").orElseThrow();
+
   protected List<File> getCompileClasspath() throws FileNotFoundException {
     // final File daggerJar =
     // Maven.findJarInLocalRepository("com.google.dagger", "dagger", DAGGER_VERSION);
@@ -291,8 +298,9 @@ public abstract class LammyTestBase {
     // return Lists.of(daggerJar, javaxInjectJar, jakartaInjectApiJar, jsr305Jar);
     final File awsLambdaJavaCoreJar = Maven.findJarInLocalRepository("com.amazonaws",
         "aws-lambda-java-core", AWS_LAMBDA_JAVA_CORE_VERSION);
+    final File cracJar = Maven.findJarInLocalRepository("io.github.crac", "org-crac", CRAC_VERSION);
     final File lammyCoreJar = findJarInBuild("lammy-core");
-    return unmodifiableList(asList(awsLambdaJavaCoreJar, lammyCoreJar));
+    return unmodifiableList(asList(awsLambdaJavaCoreJar, cracJar, lammyCoreJar));
   }
 
   /**

@@ -24,6 +24,7 @@
                         <systemPropertyVariables>
                             <maven.lammy.version>${project.version}</maven.lammy.version>
                             <maven.project.basedir>${project.basedir}</maven.project.basedir>
+                            <maven.crac.version>${crac.version}</maven.crac.version>
                             <maven.aws-lambda-java-core.version>${aws-lambda-java-core.version}</maven.aws-lambda-java-core.version>
                             <maven.aws-lambda-java-events.version>${aws-lambda-java-events.version}</maven.aws-lambda-java-events.version>
                             <maven.aws-lambda-java-serialization.version>${aws-lambda-java-serialization.version}</maven.aws-lambda-java-serialization.version>

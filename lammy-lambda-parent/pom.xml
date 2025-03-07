@@ -11,7 +11,9 @@
     <artifactId>lammy-lambda-parent</artifactId>
     <name>lammy-lambda-parent</name>
     <description>
-        An example parent POM for building AWS Lambda functions using lammy.
+        An example parent POM for building AWS Lambda functions. Does not
+        include any lammy dependencies, but does include the BOM to make it
+        easy to include them on your own.
     </description>
     <packaging>pom</packaging>
     <build>
@@ -56,7 +58,7 @@
         <dependency>
             <groupId>io.github.crac</groupId>
             <artifactId>org-crac</artifactId>
-            <scope>provided</scope>
+            <!-- NOTE: THIS IS NOT PROVIDED! -->
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>
