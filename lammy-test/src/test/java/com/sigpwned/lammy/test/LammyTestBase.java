@@ -2,6 +2,7 @@ package com.sigpwned.lammy.test;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
+import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -62,22 +63,29 @@ public abstract class LammyTestBase {
   @Container
   public static LocalStackContainer localstack =
       new LocalStackContainer(DockerImageName.parse("localstack/localstack:latest"))
+          .withEnv("DEBUG", "1") // Ensure our lambda functino logs are visible in container logs
           .withServices(LocalStackContainer.Service.LAMBDA);
 
   public Compilation doCompile(JavaFileObject... source) throws IOException {
     return Compiler.javac().withClasspath(getCompileClasspath()).compile(source);
   }
 
+  /**
+   * Assumes the lambda function is the class com.example.LambdaFunction. The handler should always
+   * be named handleRequest, since we're using lammy base classes.
+   */
   public String doDeployLambdaFunction(File deploymentPackageJar) throws IOException {
     // Read the generated JAR file into a ByteBuffer and then wrap it as SdkBytes.
     final ByteBuffer jarBytes = ByteBuffer.wrap(Files.readAllBytes(deploymentPackageJar.toPath()));
     final SdkBytes sdkJarBytes = SdkBytes.fromByteBuffer(jarBytes);
 
+    final long now = System.currentTimeMillis();
+
     // TODO Let's not hard-code things, shall we?
     // Create the Lambda function. Adjust runtime as needed.
     final CreateFunctionRequest createFunctionRequest =
-        CreateFunctionRequest.builder().functionName("HelloFunction").runtime("java8")
-            .handler("com.example.HelloLambda::handleRequest")
+        CreateFunctionRequest.builder().functionName("LambdaFunction" + now).runtime("java8")
+            .handler("com.example.LambdaFunction::handleRequest")
             // Dummy role; LocalStack does not enforce IAM.
             .role("arn:aws:iam::000000000000:role/lambda-role")
             .code(FunctionCode.builder().zipFile(sdkJarBytes).build()).build();
@@ -85,8 +93,10 @@ public abstract class LammyTestBase {
     final CreateFunctionResponse createFunctionResponse =
         getLambdaClient().createFunction(createFunctionRequest);
 
+    final String functionArn = createFunctionResponse.functionArn();
+
     GetFunctionConfigurationResponse gfcr = getLambdaClient().getFunctionConfiguration(
-        GetFunctionConfigurationRequest.builder().functionName("HelloFunction").build());
+        GetFunctionConfigurationRequest.builder().functionName(functionArn).build());
     while (gfcr.state() == State.PENDING) {
       try {
         Thread.sleep(5000);
@@ -94,7 +104,7 @@ public abstract class LammyTestBase {
         throw new InterruptedIOException();
       }
       gfcr = getLambdaClient().getFunctionConfiguration(
-          GetFunctionConfigurationRequest.builder().functionName("HelloFunction").build());
+          GetFunctionConfigurationRequest.builder().functionName(functionArn).build());
     }
 
     return createFunctionResponse.functionArn();
@@ -220,6 +230,26 @@ public abstract class LammyTestBase {
         }
       }
     }
+
+    /**
+     * Validate the deployment package. Ensure that it only contains the files we expect. In
+     * particular, the JAR should not contain any Amazon classes. All of that stuff is provided by
+     * the Lambda environment, so we don't want to bring our own.
+     *
+     * @param deploymentPackage the deployment package to validate
+     * @throws IOException if there is an error reading the JAR file
+     */
+    try (JarFile jar = new JarFile(deploymentPackageJar)) {
+      // Here, we're looking for a few specific entries in the JAR file:
+      // - META-INF/ -- various and sundry metadata, which is all fine
+      // - com/sigpwned/lammy/ -- the lammy prefix
+      // - com/example/ -- this exmaple lambda function
+      // - org/crac/ -- the Coordinated Restore at Checkpoint library
+      assertThat(jar.stream()).map(JarEntry::getName).allMatch(
+          name -> name.startsWith("com/sigpwned/lammy/") || name.startsWith("com/example/")
+              || name.startsWith("org/crac/") || name.startsWith("META-INF/"));
+    }
+
 
     return deploymentPackageJar;
   }
