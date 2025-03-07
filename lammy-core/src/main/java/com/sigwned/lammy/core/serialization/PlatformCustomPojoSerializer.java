@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Objects;
 import com.amazonaws.services.lambda.runtime.ClientContext;
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.CustomPojoSerializer;
 import com.amazonaws.services.lambda.runtime.serialization.PojoSerializer;
 import com.amazonaws.services.lambda.runtime.serialization.events.LambdaEventSerializers;
 import com.amazonaws.services.lambda.runtime.serialization.factories.GsonFactory;
@@ -36,7 +35,7 @@ import com.amazonaws.services.lambda.runtime.serialization.factories.JacksonFact
 /**
  * The default {@link PojoSerializer serializer} used by the AWS Lambda platform.
  */
-public class PlatformCustomPojoSerializer implements CustomPojoSerializer {
+public class PlatformCustomPojoSerializer implements ContextAwareCustomPojoSerializer {
   private static enum Platform {
     ANDROID, IOS, UNKNOWN;
 
@@ -66,50 +65,68 @@ public class PlatformCustomPojoSerializer implements CustomPojoSerializer {
     }
   }
 
-  public static PlatformCustomPojoSerializer forContext(Context context, Type type) {
-    final Platform platform = Platform.fromContext(context);
+  private Context context;
+  private PojoSerializer delegate;
 
-    final PojoSerializer<?> serializer = getSerializer(platform, type);
+  public PlatformCustomPojoSerializer() {}
 
-    return new PlatformCustomPojoSerializer(serializer);
-  }
-
-  private static <T> PojoSerializer<T> getSerializer(Platform platform, Type type) {
-    // if serializing a Class that is a Lambda supported event, use Jackson with customizations
-    if (type instanceof Class) {
-      Class<?> clazz = (Class<?>) type;
-      if (LambdaEventSerializers.isLambdaSupportedEvent(clazz.getName())) {
-        return (PojoSerializer<T>) LambdaEventSerializers.serializerFor(clazz,
-            Thread.currentThread().getContextClassLoader());
-      }
-    }
-
-    // else platform dependent (Android uses GSON but all other platforms use Jackson)
-    if (Objects.requireNonNull(platform) == Platform.ANDROID) {
-      return (PojoSerializer<T>) GsonFactory.getInstance().getSerializer(type);
-    }
-
-    return (PojoSerializer<T>) JacksonFactory.getInstance().getSerializer(type);
-  }
-
-  private final PojoSerializer delegate;
-
-  public PlatformCustomPojoSerializer(PojoSerializer<?> delegate) {
+  /**
+   * For testing only
+   */
+  /* default */ PlatformCustomPojoSerializer(PojoSerializer<?> delegate) {
     this.delegate = requireNonNull(delegate);
   }
 
   @Override
   public <T> T fromJson(InputStream input, Type type) {
-    return (T) delegate.fromJson(input);
+    return (T) getDelegate(type).fromJson(input);
   }
 
   @Override
   public <T> T fromJson(String input, Type type) {
-    return (T) delegate.fromJson(input);
+    return (T) getDelegate(type).fromJson(input);
   }
 
   @Override
   public <T> void toJson(T value, OutputStream output, Type type) {
-    delegate.toJson(value, output);
+    getDelegate(type).toJson(value, output);
+  }
+
+  private PojoSerializer getDelegate(Type type) {
+    // if serializing a Class that is a Lambda supported event, use Jackson with customizations
+    if (type instanceof Class) {
+      Class<?> clazz = (Class<?>) type;
+      if (LambdaEventSerializers.isLambdaSupportedEvent(clazz.getName())) {
+        return delegate = LambdaEventSerializers.serializerFor(clazz,
+            Thread.currentThread().getContextClassLoader());
+      }
+    }
+
+    final Platform platform = Platform.fromContext(getContext());
+
+    // else platform dependent (Android uses GSON but all other platforms use Jackson)
+    if (Objects.requireNonNull(platform) == Platform.ANDROID) {
+      return delegate = GsonFactory.getInstance().getSerializer(type);
+    }
+
+    return delegate = JacksonFactory.getInstance().getSerializer(type);
+  }
+
+  @Override
+  public void setContext(Context context) {
+    this.context = context;
+  }
+
+  private Context getContext() {
+    if (context == null) {
+      // This is called when a context-aware serializer is used without being informed of its
+      // context. This happens when the serializer is used INSIDE of the AWS Lambda runtime (e.g.,
+      // in a BeanLambdaFunctionBase) because the context is not available until the function is
+      // called, but the serializer is invoked before the function is called to deserialize the
+      // input for the call. Thus, context-aware serializers should only be used in the context of
+      // an application-serialized Lambda function (e.g., in a StreamedBeanLambdaFunctionBase).
+      throw new IllegalStateException("context not set");
+    }
+    return context;
   }
 }

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,6 +32,7 @@ import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import com.sigwned.lammy.core.base.LambdaFunctionBase;
 import com.sigwned.lammy.core.model.bean.RequestFilter;
 import com.sigwned.lammy.core.model.stream.InputInterceptor;
+import com.sigwned.lammy.core.serialization.ContextAwareCustomPojoSerializer;
 import com.sigwned.lammy.core.serialization.PlatformCustomPojoSerializer;
 import com.sigwned.lammy.core.util.CustomPojoSerializers;
 import com.sigwned.lammy.core.util.GenericTypes;
@@ -48,7 +49,8 @@ import com.sigwned.lammy.core.util.MoreObjects;
       StreamedBeanLambdaConfiguration configuration) {
     if (serializer == null)
       serializer = CustomPojoSerializers.loadSerializer();
-    this.serializer = serializer;
+    if (serializer != null)
+      setSerializer(serializer);
 
     if (requestType == null)
       requestType = GenericTypes.findGenericParameter(getClass(), StreamedBeanLambdaBase.class, 0)
@@ -70,12 +72,21 @@ import com.sigwned.lammy.core.util.MoreObjects;
   }
 
   protected void completeInitialization(Context context) {
-    if (serializer == null)
-      serializer = PlatformCustomPojoSerializer.forContext(context, getRequestType());
+    if (getSerializer() == null)
+      setSerializer(new PlatformCustomPojoSerializer());
+
+    if (getSerializer() != null && getSerializer() instanceof ContextAwareCustomPojoSerializer)
+      ((ContextAwareCustomPojoSerializer) getSerializer()).setContext(context);
   }
 
   protected CustomPojoSerializer getSerializer() {
     return serializer;
+  }
+
+  private void setSerializer(CustomPojoSerializer serializer) {
+    if (serializer == null)
+      throw new NullPointerException();
+    this.serializer = serializer;
   }
 
   public Type getRequestType() {

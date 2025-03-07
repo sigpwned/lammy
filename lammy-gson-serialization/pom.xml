@@ -12,10 +12,6 @@
     <name>lammy-gson-serialization</name>
     <packaging>jar</packaging>
 
-    <properties>
-      <jackson.version>2.15.3</jackson.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.sigpwned</groupId>

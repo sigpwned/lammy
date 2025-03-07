@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,9 +23,10 @@ import static java.util.Objects.requireNonNull;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
+import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.CustomPojoSerializer;
 
-public class CompoundCustomPojoSerializer implements CustomPojoSerializer {
+public class CompoundCustomPojoSerializer implements ContextAwareCustomPojoSerializer {
   private final CustomPojoSerializer serializer;
   private final CustomPojoSerializer deserializer;
 
@@ -56,5 +57,13 @@ public class CompoundCustomPojoSerializer implements CustomPojoSerializer {
 
   private CustomPojoSerializer getDeserializer() {
     return deserializer;
+  }
+
+  @Override
+  public void setContext(Context context) {
+    if (getSerializer() instanceof ContextAwareCustomPojoSerializer)
+      ((ContextAwareCustomPojoSerializer) getSerializer()).setContext(context);
+    if (getDeserializer() instanceof ContextAwareCustomPojoSerializer)
+      ((ContextAwareCustomPojoSerializer) getDeserializer()).setContext(context);
   }
 }

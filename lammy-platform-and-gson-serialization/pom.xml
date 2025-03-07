@@ -8,8 +8,8 @@
         <relativePath>../lammy-parent</relativePath>
     </parent>
 
-    <artifactId>lammy-jackson-serialization</artifactId>
-    <name>lammy-jackson-serialization</name>
+    <artifactId>lammy-platform-and-gson-serialization</artifactId>
+    <name>lammy-platform-and-gson-serialization</name>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -18,16 +18,8 @@
             <artifactId>lammy-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jdk8</artifactId>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
         </dependency>
         <dependency>
             <groupId>com.amazonaws</groupId>

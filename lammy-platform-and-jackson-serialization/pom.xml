@@ -8,8 +8,8 @@
         <relativePath>../lammy-parent</relativePath>
     </parent>
 
-    <artifactId>lammy-jackson-serialization</artifactId>
-    <name>lammy-jackson-serialization</name>
+    <artifactId>lammy-platform-and-jackson-serialization</artifactId>
+    <name>lammy-platform-and-jackson-serialization</name>
     <packaging>jar</packaging>
 
     <dependencies>
