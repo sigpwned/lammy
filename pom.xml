@@ -61,9 +61,7 @@
         <module>lammy-parent</module>
         <module>lammy-core</module>
         <module>lammy-jackson-serialization</module>
-        <module>lammy-platform-and-jackson-serialization</module>
         <module>lammy-gson-serialization</module>
-        <module>lammy-platform-and-gson-serialization</module>
         <module>lammy-hibernate-validation</module>
         <module>lammy-bom</module>
         <module>lammy-lambda-bom</module>
