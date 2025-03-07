@@ -86,6 +86,13 @@
             <version>3.21.0</version>
             <scope>test</scope>
         </dependency>
+        
+        <!-- JSON -->
+        <dependency>
+            <groupId>com.sigpwned</groupId>
+            <artifactId>just-json</artifactId>
+            <version>0.0.1</version>
+        </dependency>
 
         <!-- Toolbox -->
         <dependency>

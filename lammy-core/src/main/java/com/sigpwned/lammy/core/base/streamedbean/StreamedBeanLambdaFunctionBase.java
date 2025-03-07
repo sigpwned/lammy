@@ -168,14 +168,14 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT>
 
         // Otherwise, try to find an exception writer that can handle this exception. If we don't
         // find one, then propagate the exception.
-        final ExceptionMapper<? extends Exception, ResponseT> exceptionMapper =
+        final ExceptionMapper exceptionMapper =
             ExceptionMappers.findExceptionMapperForException(getExceptionMappers(), e).orElse(null);
         if (exceptionMapper == null)
           throw e;
 
         try {
           final ResponseT originalError =
-              exceptionMapper.mapExceptionTo(e, getResponseType(), context);
+              (ResponseT) exceptionMapper.mapExceptionTo(e, getResponseType(), context);
           final ResponseContext<ResponseT> errorContext =
               new DefaultResponseContext<>(originalError);
           preparedResponse = prepareResponse(requestContext, errorContext, context);

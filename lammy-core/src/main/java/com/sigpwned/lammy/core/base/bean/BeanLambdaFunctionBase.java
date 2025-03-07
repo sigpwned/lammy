@@ -115,13 +115,14 @@ public abstract class BeanLambdaFunctionBase<RequestT, ResponseT>
           new DefaultResponseContext<>(originalResponse);
       preparedResponse = prepareResponse(requestContext, responseContext, context);
     } catch (Exception e) {
-      final ExceptionMapper<? extends Exception, ResponseT> exceptionMapper =
+      final ExceptionMapper exceptionMapper =
           ExceptionMappers.findExceptionMapperForException(getExceptionMappers(), e).orElse(null);
       if (exceptionMapper == null)
         throw e;
 
       try {
-        final ResponseT originalError = exceptionMapper.mapExceptionTo(e, responseType, context);
+        final ResponseT originalError =
+            (ResponseT) exceptionMapper.mapExceptionTo(e, responseType, context);
         final ResponseContext<ResponseT> errorContext = new DefaultResponseContext<>(originalError);
         preparedResponse = prepareResponse(requestContext, errorContext, context);
       } catch (Exception e2) {

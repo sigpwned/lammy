@@ -2,6 +2,7 @@ package com.sigpwned.lammy.test;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,6 +20,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.ServiceLoader;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -99,7 +101,7 @@ public abstract class LammyTestBase {
         GetFunctionConfigurationRequest.builder().functionName(functionArn).build());
     while (gfcr.state() == State.PENDING) {
       try {
-        Thread.sleep(5000);
+        Thread.sleep(500);
       } catch (InterruptedException e) {
         throw new InterruptedIOException();
       }
@@ -213,11 +215,23 @@ public abstract class LammyTestBase {
     return result;
   }
 
-  protected File createDeploymentPackage(Compilation compilation) throws IOException {
+  public static class ExtraJarEntry {
+    public final JarEntry entry;
+    public final byte[] contents;
+
+    public ExtraJarEntry(JarEntry entry, byte[] contents) {
+      this.entry = requireNonNull(entry);
+      this.contents = requireNonNull(contents);
+    }
+  }
+
+  protected File createDeploymentPackage(Compilation compilation, ExtraJarEntry... extraEntries)
+      throws IOException {
     final List<File> classpathAsFiles = getRunClasspath(compilation);
 
     final File deploymentPackageJar = File.createTempFile("deployment.", ".jar");
     try (JarOutputStream out = new JarOutputStream(new FileOutputStream(deploymentPackageJar))) {
+      // Add the compiled classes to the JAR
       for (File file : classpathAsFiles) {
         if (file.isDirectory()) {
           addToJar(out, file);
@@ -228,6 +242,15 @@ public abstract class LammyTestBase {
         } else {
           throw new IOException("unrecognized classpath entry " + file);
         }
+      }
+
+      // Add any extra entries to the JAR
+      for (ExtraJarEntry extraEntry : extraEntries) {
+        final JarEntry entry = extraEntry.entry;
+        final byte[] contents = extraEntry.contents;
+        out.putNextEntry(entry);
+        out.write(contents);
+        out.closeEntry();
       }
     }
 
@@ -449,5 +472,20 @@ public abstract class LammyTestBase {
     }
 
     return unmodifiableList(result);
+  }
+
+  private final Random random = new Random();
+
+  protected String nonce() {
+    return nonce(8);
+  }
+
+  protected String nonce(int length) {
+    if (length < 1)
+      throw new IllegalArgumentException("length must be at least 1");
+    final StringBuilder result = new StringBuilder();
+    for (int i = 1; i <= length; i++)
+      result.append((char) ('a' + random.nextInt(26)));
+    return result.toString();
   }
 }

@@ -23,5 +23,5 @@ import java.lang.reflect.Type;
 import com.amazonaws.services.lambda.runtime.Context;
 
 public interface ExceptionMapper<E extends Exception, ResponseT> {
-  public ResponseT mapExceptionTo(Exception e, Type responseType, Context context);
+  public ResponseT mapExceptionTo(E e, Type responseType, Context context);
 }
