@@ -57,11 +57,16 @@
 
     <!-- Modules -->
     <modules>
-        <module>lammy-dependencies</module>
+        <module>lammy-dependencies-bom</module>
         <module>lammy-parent</module>
         <module>lammy-core</module>
-        <module>lammy-jackson</module>
+        <module>lammy-jackson-serialization</module>
+        <module>lammy-gson-serialization</module>
+        <module>lammy-hibernate-validation</module>
         <module>lammy-bom</module>
+        <module>lammy-lambda-bom</module>
+        <module>lammy-lambda-parent</module>
+        <module>lammy-test</module>
     </modules>
 
     <!-- For releasing to maven central -->
