@@ -1,0 +1,126 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.sigpwned</groupId>
+        <artifactId>lammy-parent</artifactId>
+        <version>0.0.0-b1-SNAPSHOT</version>
+        <relativePath>../lammy-parent</relativePath>
+    </parent>
+
+    <artifactId>lammy-test</artifactId>
+    <name>lammy-test</name>
+    <packaging>jar</packaging>
+    
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <systemPropertyVariables>
+                            <maven.lammy.version>${project.version}</maven.lammy.version>
+                            <maven.project.basedir>${project.basedir}</maven.project.basedir>
+                            <maven.aws-lambda-java-core.version>${aws-lambda-java-core.version}</maven.aws-lambda-java-core.version>
+                            <maven.aws-lambda-java-events.version>${aws-lambda-java-events.version}</maven.aws-lambda-java-events.version>
+                            <maven.aws-lambda-java-serialization.version>${aws-lambda-java-serialization.version}</maven.aws-lambda-java-serialization.version>
+                            <maven.aws-lambda-java-log4j2.version>${aws-lambda-java-log4j2.version}</maven.aws-lambda-java-log4j2.version>
+                            <maven.aws-lambda-java-runtime-interface-client.version>${aws-lambda-java-runtime-interface-client.version}</maven.aws-lambda-java-runtime-interface-client.version>
+                        </systemPropertyVariables>
+                    </configuration>
+                </plugin>            
+            </plugins>        
+        </pluginManagement>
+    </build>
+    
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>1.20.6</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>2.30.35</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.sigpwned</groupId>
+            <artifactId>lammy-core</artifactId>
+        </dependency>
+        
+        
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Testing -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>3.21.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Toolbox -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.3.1-jre</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Compile testing helper-->
+        <dependency>
+            <groupId>com.google.testing.compile</groupId>
+            <artifactId>compile-testing</artifactId>
+            <version>0.21.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- AWS SDK v2 for Lambda -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>lambda</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Testcontainers LocalStack module -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>localstack</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Testcontainers JUnit Jupiter integration -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>

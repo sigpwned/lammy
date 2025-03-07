@@ -14,9 +14,7 @@
     </description>
     <properties>
         <java.version>1.8</java.version>
-        <java.release>8</java.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>5.10.0</junit.version>
     </properties>
     <build>
         <pluginManagement>
@@ -28,7 +26,6 @@
                     <configuration>
                         <source>${java.version}</source>
                         <target>${java.version}</target>
-                        <release>${java.release}</release>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -67,6 +64,11 @@
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>3.5.1</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.2</version>
+                </plugin>            
             </plugins>
         </pluginManagement>
     </build>
