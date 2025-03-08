@@ -119,7 +119,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperAInitMessageIndex).isNotEqualTo(-1);
 
     final int exceptionMapperAFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "A"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "A"));
     assertThat(exceptionMapperAFilterMessageIndex).isNotEqualTo(-1);
 
     final int exceptionMapperBInitMessageIndex =
@@ -127,7 +127,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperBInitMessageIndex).isNotEqualTo(-1);
 
     final int exceptionMapperBFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "B"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "B"));
     assertThat(exceptionMapperBFilterMessageIndex).isEqualTo(-1);
 
     assertThat(exceptionMapperAInitMessageIndex).isLessThan(exceptionMapperAFilterMessageIndex);
@@ -154,7 +154,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperAInitMessageIndex).isNotEqualTo(-1);
 
     final int exceptionMapperAFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "A"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "A"));
     assertThat(exceptionMapperAFilterMessageIndex).isNotEqualTo(-1);
 
     final int exceptionMapperBInitMessageIndex =
@@ -162,7 +162,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperBInitMessageIndex).isNotEqualTo(-1);
 
     final int exceptionMapperBFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "B"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "B"));
     assertThat(exceptionMapperBFilterMessageIndex).isEqualTo(-1);
 
     assertThat(exceptionMapperAInitMessageIndex).isLessThan(exceptionMapperAFilterMessageIndex);
@@ -190,7 +190,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperAInitMessageIndex).isNotEqualTo(-1);
 
     final int exceptionMapperAFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "A"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "A"));
     assertThat(exceptionMapperAFilterMessageIndex).isEqualTo(-1);
 
     final int exceptionMapperBInitMessageIndex =
@@ -198,7 +198,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperBInitMessageIndex).isNotEqualTo(-1);
 
     final int exceptionMapperBFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "B"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "B"));
     assertThat(exceptionMapperBFilterMessageIndex).isNotEqualTo(-1);
 
     assertThat(exceptionMapperAInitMessageIndex).isLessThan(exceptionMapperBInitMessageIndex);
@@ -226,7 +226,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperAInitMessageIndex).isNotEqualTo(-1);
 
     final int exceptionMapperAFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "A"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "A"));
     assertThat(exceptionMapperAFilterMessageIndex).isEqualTo(-1);
 
     final int exceptionMapperBInitMessageIndex =
@@ -234,7 +234,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperBInitMessageIndex).isNotEqualTo(-1);
 
     final int exceptionMapperBFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "B"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "B"));
     assertThat(exceptionMapperBFilterMessageIndex).isNotEqualTo(-1);
 
     assertThat(exceptionMapperAInitMessageIndex).isLessThan(exceptionMapperBInitMessageIndex);
@@ -264,7 +264,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperAInitMessageIndex).isEqualTo(-1);
 
     final int exceptionMapperAFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "A"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "A"));
     assertThat(exceptionMapperAFilterMessageIndex).isEqualTo(-1);
 
     final int exceptionMapperBInitMessageIndex =
@@ -272,7 +272,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperBInitMessageIndex).isEqualTo(-1);
 
     final int exceptionMapperBFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "B"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "B"));
     assertThat(exceptionMapperBFilterMessageIndex).isEqualTo(-1);
   }
 
@@ -299,7 +299,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperAInitMessageIndex).isEqualTo(-1);
 
     final int exceptionMapperAFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "A"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "A"));
     assertThat(exceptionMapperAFilterMessageIndex).isEqualTo(-1);
 
     final int exceptionMapperBInitMessageIndex =
@@ -307,7 +307,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperBInitMessageIndex).isEqualTo(-1);
 
     final int exceptionMapperBFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "B"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "B"));
     assertThat(exceptionMapperBFilterMessageIndex).isEqualTo(-1);
   }
 
@@ -334,7 +334,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperAInitMessageIndex).isEqualTo(-1);
 
     final int exceptionMapperAFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "A"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "A"));
     assertThat(exceptionMapperAFilterMessageIndex).isEqualTo(-1);
 
     final int exceptionMapperBInitMessageIndex =
@@ -342,7 +342,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperBInitMessageIndex).isEqualTo(-1);
 
     final int exceptionMapperBFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "B"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "B"));
     assertThat(exceptionMapperBFilterMessageIndex).isEqualTo(-1);
   }
 
@@ -370,7 +370,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperAInitMessageIndex).isNotEqualTo(-1);
 
     final int exceptionMapperAFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "A"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "A"));
     assertThat(exceptionMapperAFilterMessageIndex).isEqualTo(-1);
 
     final int exceptionMapperBInitMessageIndex =
@@ -378,7 +378,7 @@ public abstract class ExceptionMapperTestBase extends LammyTestBase implements B
     assertThat(exceptionMapperBInitMessageIndex).isNotEqualTo(-1);
 
     final int exceptionMapperBFilterMessageIndex =
-        localstack.getLogs().indexOf(exceptionMapperFilterMessage(nonce, "B"));
+        localstack.getLogs().indexOf(exceptionMapperMapMessage(nonce, "B"));
     assertThat(exceptionMapperBFilterMessageIndex).isEqualTo(-1);
 
     assertThat(exceptionMapperAInitMessageIndex).isLessThan(exceptionMapperBInitMessageIndex);

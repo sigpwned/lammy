@@ -23,5 +23,5 @@ import java.io.OutputStream;
 import com.amazonaws.services.lambda.runtime.Context;
 
 public interface ExceptionWriter<E extends Exception> {
-  public void writeExceptionTo(Exception e, OutputStream out, Context context);
+  public void writeExceptionTo(E e, OutputStream out, Context context);
 }

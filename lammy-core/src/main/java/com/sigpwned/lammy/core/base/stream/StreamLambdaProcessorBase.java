@@ -95,7 +95,7 @@ public abstract class StreamLambdaProcessorBase extends StreamLambdaBase {
 
         // Otherwise, try to find an exception writer that can handle this exception. If we don't
         // find one, then propagate the exception.
-        final ExceptionWriter<? extends Exception> exceptionWriter =
+        final ExceptionWriter exceptionWriter =
             ExceptionWriters.findExceptionWriterForException(getExceptionWriters(), e).orElse(null);
         if (exceptionWriter == null)
           throw e;

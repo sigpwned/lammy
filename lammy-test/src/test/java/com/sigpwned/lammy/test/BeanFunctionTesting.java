@@ -2,6 +2,7 @@ package com.sigpwned.lammy.test;
 
 import java.util.List;
 import java.util.Map;
+import com.sigpwned.lammy.core.model.bean.ExceptionMapper;
 import com.sigpwned.lammy.core.model.bean.RequestContext;
 import com.sigpwned.lammy.core.model.bean.RequestFilter;
 import com.sigpwned.lammy.core.model.bean.ResponseFilter;
@@ -28,9 +29,9 @@ public interface BeanFunctionTesting extends CodeGenerating {
    *
    * <ul>
    * <li>It is in package {@code com.example}</li>
-   * <li>Its is {@link #requestFilterSimpleClassName(String) simple name}
-   * {@code ExampleRequestFilter} followed by the given {@code id} (e.g., for id {@code "A"}, the
-   * name would be {@code ExampleRequestFilterA})</li>
+   * <li>Its {@link #requestFilterSimpleClassName(String) simple name} {@code ExampleRequestFilter}
+   * followed by the given {@code id} (e.g., for id {@code "A"}, the name would be
+   * {@code ExampleRequestFilterA})</li>
    * <li>It implements {@link RequestFilter}</li>
    * <li>Its default constructor prints {@link #requestFilterInitMessage(String, String) a message}
    * to {@link System#out}</li>
@@ -106,7 +107,7 @@ public interface BeanFunctionTesting extends CodeGenerating {
   }
 
   /**
-   * Generates source code for a {@link responseFilter request filter} based on the parameters. The
+   * Generates source code for a {@link ResponseFilter response filter} based on the parameters. The
    * generated class has the following properties:
    *
    * <ul>
@@ -181,22 +182,22 @@ public interface BeanFunctionTesting extends CodeGenerating {
 
 
   /**
-   * Generates source code for a {@link responseFilter request filter} based on the parameters. The
-   * generated class has the following properties:
+   * Generates source code for a {@link ExceptionMapper exception mapper} based on the parameters.
+   * The generated class has the following properties:
    *
    * <ul>
    * <li>It is in package {@code com.example}</li>
-   * <li>Its is {@link #responseFilterSimpleClassName(String) simple name}
-   * {@code ExampleresponseFilter} followed by the given {@code id} (e.g., for id {@code "A"}, the
-   * name would be {@code ExampleresponseFilterA})</li>
-   * <li>It implements {@link ResponseFilter}</li>
-   * <li>Its default constructor prints {@link #responseFilterInitMessage(String, String) a message}
-   * to {@link System#out}</li>
+   * <li>Its is {@link #exceptionMapperSimpleClassName(String) simple name}
+   * {@code ExampleExceptionMapper} followed by the given {@code id} (e.g., for id {@code "A"}, the
+   * name would be {@code ExampleExceptionMapperA})</li>
+   * <li>It implements {@link ExceptionMapper}</li>
+   * <li>Its default constructor prints {@link #exceptionMapperInitMessage(String, String) a
+   * message} to {@link System#out}</li>
    * <li>Its
-   * {@link ResponseFilter#filterRequest(RequestContext, com.amazonaws.services.lambda.runtime.Context)}
-   * implementation prints {@link #responseFilterFilterMessage(String, String) a message} to
+   * {@link ExceptionMapper#mapExceptionTo(Exception, java.lang.reflect.Type, com.sigpwned.lammy.core.model.bean.Context)}
+   * implementation prints {@link #exceptionMapperMapMessage(String, String) a message} to
    * {@link System#out}</li>
-   * <li>The body of the {@code filterRequest} method is the given {@code body}</li>
+   * <li>The body of the {@code mapExceptionTo} method is the given {@code body}</li>
    * </ul>
    *
    * @param nonce a unique identifier for the generated source code
@@ -223,7 +224,7 @@ public interface BeanFunctionTesting extends CodeGenerating {
         + "\n"
         + "  @Override\n"
         + "  public String mapExceptionTo(" + exceptionType + " e, Type responseType, Context context) {\n"
-        + "    System.out.println(\"" + exceptionMapperFilterMessage(nonce, id) + "\");\n"
+        + "    System.out.println(\"" + exceptionMapperMapMessage(nonce, id) + "\");\n"
         + "    return " + expr + ";\n"
         + "  }\n"
         + "}\n";
@@ -242,7 +243,7 @@ public interface BeanFunctionTesting extends CodeGenerating {
     return nonce + ": " + exceptionMapperSimpleClassName(id) + ".<init>";
   }
 
-  public default String exceptionMapperFilterMessage(String nonce, String id) {
+  public default String exceptionMapperMapMessage(String nonce, String id) {
     return nonce + ": " + exceptionMapperSimpleClassName(id) + ".mapExceptionTo";
   }
 }
