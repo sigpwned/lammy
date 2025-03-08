@@ -128,3 +128,12 @@ If the application propagates an exception at any step, then the framework will 
     }
 
 Unfortunately, the runtime does not offer a way for applications to generate an error response with a custom serialization format.
+
+## Building
+
+When building, you may notice tests failing, especially with timeout messages indicating that LocalStack has stopped responding to requests. Try running the offending tests individually like this:
+
+    JAVA_HOME="/Library/Java/JavaVirtualMachines/amazon-corretto-8.jdk/Contents/Home" mvn -pl lammy-test test -Dtest='BeanLambdaFunctionIntegrationTest#givenExceptionMapperServicesAB_whenAutoloadExplicitlyEnabledAndThrowNonMatching_thenPropagate
+
+If the tests pass when run individually but fail when run in the context of the larger build, then then it's likely that the underlying LocalStack instance is running out of memory and crashing. In this situation, try increasing the memory limit for your container engine. For example, in Docker Desktop, increasing the memory limit by going to Settings &rarr; Resources &rarr; Memory Limit to at least 4GB.
+
