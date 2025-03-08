@@ -65,6 +65,8 @@ public abstract class LammyTestBase {
   @Container
   public static LocalStackContainer localstack =
       new LocalStackContainer(DockerImageName.parse("localstack/localstack:latest"))
+          .withCreateContainerCmdModifier(cmd -> cmd.getHostConfig().withAutoRemove(true)
+              .withMemory(4L * 1024L * 1024L * 1024L)) // 4 GB
           .withEnv("DEBUG", "1") // Ensure our lambda functino logs are visible in container logs
           .withServices(LocalStackContainer.Service.LAMBDA);
 

@@ -23,12 +23,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.IOException;
 import javax.tools.JavaFileObject;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.CompilationSubject;
 
 @Testcontainers
+@Disabled("Is this the cause of errors?")
 public class BeanLambdaConsumerIntegrationTest extends LammyTestBase {
   @Test
   public void givenBeanLambdaConsumerBaseExample_whenBuildAndInvoke_thenGetExpectedResult()

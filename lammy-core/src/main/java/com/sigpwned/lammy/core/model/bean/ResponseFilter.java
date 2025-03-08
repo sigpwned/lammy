@@ -21,7 +21,7 @@ package com.sigpwned.lammy.core.model.bean;
 
 import com.amazonaws.services.lambda.runtime.Context;
 
-public interface ResponseFilter<InputT, OutputT> {
-  public void filterResponse(RequestContext<InputT> requestContext,
-      ResponseContext<OutputT> responseContext, Context lambdaContext);
+public interface ResponseFilter<RequestT, ResponseT> {
+  public void filterResponse(RequestContext<RequestT> requestContext,
+      ResponseContext<ResponseT> responseContext, Context lambdaContext);
 }
