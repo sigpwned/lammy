@@ -204,6 +204,8 @@ public interface StreamFunctionTesting extends CodeGenerating {
         + "import com.amazonaws.services.lambda.runtime.Context;\n"
         + "import java.lang.reflect.Type;\n"
         + "import java.io.OutputStream;\n"
+        + "import java.io.IOException;\n"
+        + "import java.io.UncheckedIOException;\n"
         + "import java.nio.charset.StandardCharsets;\n"
         + "\n"
         + "public class " + exceptionWriterSimpleClassName(id) + " implements ExceptionWriter<" + exceptionType + "> {\n"
@@ -214,7 +216,11 @@ public interface StreamFunctionTesting extends CodeGenerating {
         + "  @Override\n"
         + "  public void writeExceptionTo(" + exceptionType + " e, OutputStream out, Context context) {\n"
         + "    System.out.println(\"" + exceptionWriterFilterMessage(nonce, id) + "\");\n"
-        + "    out.write((" + expr + ").getBytes(StandardCharsets.UTF_8));\n"
+        + "    try {\n"
+        + "      out.write((" + expr + ").getBytes(StandardCharsets.UTF_8));\n"
+        + "    } catch (IOException ex) {\n"
+        + "      throw new UncheckedIOException(ex);\n"
+        + "    }\n"
         + "  }\n"
         + "}\n";
     // @formatter:on
