@@ -22,8 +22,8 @@ package com.sigpwned.lammy.core.base.streamedbean;
 import java.util.Objects;
 
 /* default */ class StreamedBeanLambdaConfiguration {
-  public static StreamedBeanLambdaConfiguration fromFunctionConfiguration(
-      StreamedBeanLambdaFunctionConfiguration functionConfiguration) {
+  public static StreamedBeanLambdaConfiguration fromProcessorConfiguration(
+      StreamedBeanLambdaProcessorConfiguration functionConfiguration) {
     return new StreamedBeanLambdaConfiguration()
         .withAutoloadInputInterceptors(functionConfiguration.getAutoloadInputInterceptors())
         .withAutoloadRequestFilters(functionConfiguration.getAutoloadRequestFilters());

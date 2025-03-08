@@ -49,31 +49,31 @@ import com.sigpwned.lammy.core.util.MoreObjects;
  * @see <a href="https://docs.aws.amazon.com/lambda/latest/dg/java-custom-serialization.html">
  *      https://docs.aws.amazon.com/lambda/latest/dg/java-custom-serialization.html</a>
  */
-public abstract class BeanLambdaFunctionBase<RequestT, ResponseT>
+public abstract class BeanLambdaProcessorBase<RequestT, ResponseT>
     extends BeanLambdaBase<RequestT, ResponseT> implements RequestHandler<RequestT, ResponseT> {
   private final Type responseType;
   private final List<ResponseFilter<RequestT, ResponseT>> responseFilters;
   private final List<ExceptionMapper<?, ResponseT>> exceptionMappers;
   private boolean initialized;
 
-  protected BeanLambdaFunctionBase() {
-    this(new BeanLambdaFunctionConfiguration());
+  protected BeanLambdaProcessorBase() {
+    this(new BeanLambdaProcessorConfiguration());
   }
 
-  protected BeanLambdaFunctionBase(BeanLambdaFunctionConfiguration configuration) {
+  protected BeanLambdaProcessorBase(BeanLambdaProcessorConfiguration configuration) {
     this(null, null, configuration);
   }
 
-  protected BeanLambdaFunctionBase(Type requestType, Type responseType) {
-    this(requestType, responseType, new BeanLambdaFunctionConfiguration());
+  protected BeanLambdaProcessorBase(Type requestType, Type responseType) {
+    this(requestType, responseType, new BeanLambdaProcessorConfiguration());
   }
 
-  protected BeanLambdaFunctionBase(Type requestType, Type responseType,
-      BeanLambdaFunctionConfiguration configuration) {
-    super(requestType, BeanLambdaConfiguration.fromFunctionConfiguration(configuration));
+  protected BeanLambdaProcessorBase(Type requestType, Type responseType,
+      BeanLambdaProcessorConfiguration configuration) {
+    super(requestType, BeanLambdaConfiguration.fromProcessorConfiguration(configuration));
 
     if (responseType == null)
-      responseType = GenericTypes.findGenericParameter(getClass(), BeanLambdaFunctionBase.class, 1)
+      responseType = GenericTypes.findGenericParameter(getClass(), BeanLambdaProcessorBase.class, 1)
           .orElseThrow(() -> new IllegalArgumentException("Could not determine response type"));
     this.responseType = requireNonNull(responseType);
 

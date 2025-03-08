@@ -21,12 +21,12 @@ package com.sigpwned.lammy.core.base.bean;
 
 import java.util.Objects;
 
-public class BeanLambdaFunctionConfiguration {
+public class BeanLambdaProcessorConfiguration {
   private Boolean autoloadRequestFilters;
   private Boolean autoloadResponseFilters;
   private Boolean autoloadExceptionMappers;
 
-  public BeanLambdaFunctionConfiguration() {}
+  public BeanLambdaProcessorConfiguration() {}
 
   public Boolean getAutoloadRequestFilters() {
     return autoloadRequestFilters;
@@ -36,7 +36,7 @@ public class BeanLambdaFunctionConfiguration {
     this.autoloadRequestFilters = autoloadRequestFilters;
   }
 
-  public BeanLambdaFunctionConfiguration withAutoloadRequestFilters(Boolean autoloadRequestFilters) {
+  public BeanLambdaProcessorConfiguration withAutoloadRequestFilters(Boolean autoloadRequestFilters) {
     this.autoloadRequestFilters = autoloadRequestFilters;
     return this;
   }
@@ -49,7 +49,7 @@ public class BeanLambdaFunctionConfiguration {
     this.autoloadResponseFilters = autoloadResponseFilters;
   }
 
-  public BeanLambdaFunctionConfiguration withAutoloadResponseFilters(Boolean autoloadResponseFilters) {
+  public BeanLambdaProcessorConfiguration withAutoloadResponseFilters(Boolean autoloadResponseFilters) {
     this.autoloadResponseFilters = autoloadResponseFilters;
     return this;
   }
@@ -62,7 +62,7 @@ public class BeanLambdaFunctionConfiguration {
     this.autoloadExceptionMappers = autoloadExceptionMappers;
   }
 
-  public BeanLambdaFunctionConfiguration withAutoloadExceptionMappers(Boolean autoloadExceptionMappers) {
+  public BeanLambdaProcessorConfiguration withAutoloadExceptionMappers(Boolean autoloadExceptionMappers) {
     this.autoloadExceptionMappers = autoloadExceptionMappers;
     return this;
   }
@@ -80,7 +80,7 @@ public class BeanLambdaFunctionConfiguration {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    BeanLambdaFunctionConfiguration other = (BeanLambdaFunctionConfiguration) obj;
+    BeanLambdaProcessorConfiguration other = (BeanLambdaProcessorConfiguration) obj;
     return Objects.equals(autoloadExceptionMappers, other.autoloadExceptionMappers)
         && Objects.equals(autoloadRequestFilters, other.autoloadRequestFilters)
         && Objects.equals(autoloadResponseFilters, other.autoloadResponseFilters);

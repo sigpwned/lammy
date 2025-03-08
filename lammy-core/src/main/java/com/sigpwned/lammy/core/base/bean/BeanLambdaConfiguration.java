@@ -22,8 +22,8 @@ package com.sigpwned.lammy.core.base.bean;
 import java.util.Objects;
 
 /* default */ class BeanLambdaConfiguration {
-  public static BeanLambdaConfiguration fromFunctionConfiguration(
-      BeanLambdaFunctionConfiguration c) {
+  public static BeanLambdaConfiguration fromProcessorConfiguration(
+      BeanLambdaProcessorConfiguration c) {
     return new BeanLambdaConfiguration().withAutoloadRequestFilters(c.getAutoloadRequestFilters());
   }
 

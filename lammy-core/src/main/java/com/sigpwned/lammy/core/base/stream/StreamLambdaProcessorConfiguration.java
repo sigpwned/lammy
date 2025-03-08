@@ -21,12 +21,12 @@ package com.sigpwned.lammy.core.base.stream;
 
 import java.util.Objects;
 
-public class StreamLambdaFunctionConfiguration {
+public class StreamLambdaProcessorConfiguration {
   private Boolean autoloadInputInterceptors;
   private Boolean autoloadOutputInterceptors;
   private Boolean autoloadExceptionWriters;
 
-  public StreamLambdaFunctionConfiguration() {}
+  public StreamLambdaProcessorConfiguration() {}
 
   public Boolean getAutoloadInputInterceptors() {
     return autoloadInputInterceptors;
@@ -36,7 +36,7 @@ public class StreamLambdaFunctionConfiguration {
     this.autoloadInputInterceptors = autoloadInputInterceptors;
   }
 
-  public StreamLambdaFunctionConfiguration withAutoloadInputInterceptors(
+  public StreamLambdaProcessorConfiguration withAutoloadInputInterceptors(
       Boolean autoloadInputInterceptors) {
     this.autoloadInputInterceptors = autoloadInputInterceptors;
     return this;
@@ -50,7 +50,7 @@ public class StreamLambdaFunctionConfiguration {
     this.autoloadOutputInterceptors = autoloadOutputInterceptors;
   }
 
-  public StreamLambdaFunctionConfiguration withAutoloadOutputInterceptors(
+  public StreamLambdaProcessorConfiguration withAutoloadOutputInterceptors(
       Boolean autoloadOutputInterceptors) {
     this.autoloadOutputInterceptors = autoloadOutputInterceptors;
     return this;
@@ -64,7 +64,7 @@ public class StreamLambdaFunctionConfiguration {
     this.autoloadExceptionWriters = autoloadExceptionWriters;
   }
 
-  public StreamLambdaFunctionConfiguration withAutoloadExceptionWriters(Boolean autoloadExceptionWriters) {
+  public StreamLambdaProcessorConfiguration withAutoloadExceptionWriters(Boolean autoloadExceptionWriters) {
     this.autoloadExceptionWriters = autoloadExceptionWriters;
     return this;
   }
@@ -83,7 +83,7 @@ public class StreamLambdaFunctionConfiguration {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    StreamLambdaFunctionConfiguration other = (StreamLambdaFunctionConfiguration) obj;
+    StreamLambdaProcessorConfiguration other = (StreamLambdaProcessorConfiguration) obj;
     return Objects.equals(autoloadExceptionWriters, other.autoloadExceptionWriters)
         && Objects.equals(autoloadInputInterceptors, other.autoloadInputInterceptors)
         && Objects.equals(autoloadOutputInterceptors, other.autoloadOutputInterceptors);

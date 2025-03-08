@@ -41,17 +41,17 @@ import com.sigpwned.lammy.core.util.MoreObjects;
 /**
  * A basic implementation of a Lambda function that handles streaming input and output.
  */
-public abstract class StreamLambdaFunctionBase extends StreamLambdaBase {
+public abstract class StreamLambdaProcessorBase extends StreamLambdaBase {
   private final List<OutputInterceptor> outputInterceptors;
   private final List<ExceptionWriter<?>> exceptionWriters;
   boolean initialized;
 
-  protected StreamLambdaFunctionBase() {
-    this(new StreamLambdaFunctionConfiguration());
+  protected StreamLambdaProcessorBase() {
+    this(new StreamLambdaProcessorConfiguration());
   }
 
-  protected StreamLambdaFunctionBase(StreamLambdaFunctionConfiguration configuration) {
-    super(StreamLambdaConfiguration.fromFunctionConfiguration(configuration));
+  protected StreamLambdaProcessorBase(StreamLambdaProcessorConfiguration configuration) {
+    super(StreamLambdaConfiguration.fromProcessorConfiguration(configuration));
     outputInterceptors = new ArrayList<>();
     if (MoreObjects.coalesce(configuration.getAutoloadOutputInterceptors(), getAutoloadAll())
         .orElse(false)) {

@@ -27,18 +27,11 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import javax.tools.JavaFileObject;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.CompilationSubject;
 import com.sigpwned.just.json.JustJson;
 
-@Testcontainers
-public class BeanLambdaFunctionExceptionMapperTest extends LammyTestBase
-    implements BeanFunctionTesting {
-  static {
-    // Enable this when needed for debugging
-    // localstack.followOutput(new Slf4jLogConsumer(LOGGER));
-  }
+public abstract class ExceptionMapperTestBase extends LammyTestBase implements BeanFunctionTesting {
 
   // THROWING PROCESSOR ////////////////////////////////////////////////////////////////////////////
 
@@ -58,40 +51,9 @@ public class BeanLambdaFunctionExceptionMapperTest extends LammyTestBase
 
   public static final String THROWING_PROCESSOR_RESPONSE_TYPE = "String";
 
-  public String throwingProcessorSource(Boolean autoloadAll, Boolean autoloadRequestFilters,
-      Boolean autoloadResponseFilters, Boolean autoloadExceptionMappers) {
-    // @formatter:off
-    return ""
-      + "package com.example;\n"
-      + "\n"
-      + "import com.amazonaws.services.lambda.runtime.Context;\n"
-      + "import com.amazonaws.services.lambda.runtime.RequestHandler;\n"
-      + "import com.sigpwned.lammy.core.base.bean.BeanLambdaFunctionBase;\n"
-      + "import com.sigpwned.lammy.core.base.bean.BeanLambdaFunctionConfiguration;\n"
-      + "import java.util.List;\n"
-      + "import java.util.Map;\n"
-      + "\n"
-      + "public class LambdaFunction extends BeanLambdaFunctionBase<" + THROWING_PROCESSOR_REQUEST_TYPE + ", " + THROWING_PROCESSOR_RESPONSE_TYPE + "> {\n"
-      + "  public LambdaFunction() {\n"
-      + "    super(new BeanLambdaFunctionConfiguration()\n"
-      + "      .withAutoloadRequestFilters(" + autoloadRequestFilters + ")\n"
-      + "      .withAutoloadResponseFilters(" + autoloadResponseFilters + ")\n"
-      + "      .withAutoloadExceptionMappers(" + autoloadExceptionMappers + "));\n"
-      + "  }\n"
-      + "\n"
-      + "  @Override\n"
-      + "  public " + THROWING_PROCESSOR_RESPONSE_TYPE +  " handleBeanRequest(" + THROWING_PROCESSOR_REQUEST_TYPE + " input, Context context) {\n"
-      + "    String name = input.get(\"name\") != null ? input.get(\"name\").toString() : \"world\";\n"
-      + "    throw new IllegalArgumentException(name);\n"
-      + "  }\n"
-      + "\n"
-      + "  @Override\n"
-      + "  protected Boolean getAutoloadAll() {\n"
-      + "    return " + autoloadAll + ";\n"
-      + "  }\n"
-      + "}\n";
-    // @formatter:on
-  }
+  public abstract String throwingProcessorSource(Boolean autoloadAll,
+      Boolean autoloadRequestFilters, Boolean autoloadResponseFilters,
+      Boolean autoloadExceptionMappers);
 
   // EXCEPTION MAPPER TESTS ////////////////////////////////////////////////////////////////////////
 

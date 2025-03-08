@@ -32,14 +32,14 @@ import com.amazonaws.services.lambda.runtime.serialization.PojoSerializer;
 import com.amazonaws.services.lambda.runtime.serialization.events.LambdaEventSerializers;
 import com.amazonaws.services.lambda.runtime.serialization.factories.GsonFactory;
 import com.amazonaws.services.lambda.runtime.serialization.factories.JacksonFactory;
-import com.sigpwned.lammy.core.base.bean.BeanLambdaFunctionBase;
-import com.sigpwned.lammy.core.base.streamedbean.StreamedBeanLambdaFunctionBase;
+import com.sigpwned.lammy.core.base.bean.BeanLambdaProcessorBase;
+import com.sigpwned.lammy.core.base.streamedbean.StreamedBeanLambdaProcessorBase;
 
 /**
  * The default {@link PojoSerializer serializer} used by the AWS Lambda platform. Note that it is
  * {@link ContextAwareCustomPojoSerializer context-aware}, which means it can only be used in
- * application-serialized Lambda functions (e.g., {@link StreamedBeanLambdaFunctionBase}) and not in
- * platform-serialized Lambda functions (e.g., {@link BeanLambdaFunctionBase}).
+ * application-serialized Lambda functions (e.g., {@link StreamedBeanLambdaProcessorBase}) and not in
+ * platform-serialized Lambda functions (e.g., {@link BeanLambdaProcessorBase}).
  */
 public class PlatformCustomPojoSerializer implements ContextAwareCustomPojoSerializer {
   private static enum Platform {

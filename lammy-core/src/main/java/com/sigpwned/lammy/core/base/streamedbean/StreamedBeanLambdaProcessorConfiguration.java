@@ -21,14 +21,14 @@ package com.sigpwned.lammy.core.base.streamedbean;
 
 import java.util.Objects;
 
-public class StreamedBeanLambdaFunctionConfiguration {
+public class StreamedBeanLambdaProcessorConfiguration {
   private Boolean autoloadInputInterceptors;
   private Boolean autoloadOutputInterceptors;
   private Boolean autoloadRequestFilters;
   private Boolean autoloadResponseFilters;
   private Boolean autoloadExceptionMappers;
 
-  public StreamedBeanLambdaFunctionConfiguration() {}
+  public StreamedBeanLambdaProcessorConfiguration() {}
 
   public Boolean getAutoloadInputInterceptors() {
     return autoloadInputInterceptors;
@@ -38,7 +38,7 @@ public class StreamedBeanLambdaFunctionConfiguration {
     this.autoloadInputInterceptors = autoloadInputInterceptors;
   }
 
-  public StreamedBeanLambdaFunctionConfiguration withAutoloadInputInterceptors(
+  public StreamedBeanLambdaProcessorConfiguration withAutoloadInputInterceptors(
       Boolean autoloadInputInterceptors) {
     this.autoloadInputInterceptors = autoloadInputInterceptors;
     return this;
@@ -52,7 +52,7 @@ public class StreamedBeanLambdaFunctionConfiguration {
     this.autoloadOutputInterceptors = autoloadOutputInterceptors;
   }
 
-  public StreamedBeanLambdaFunctionConfiguration withAutoloadOutputInterceptors(
+  public StreamedBeanLambdaProcessorConfiguration withAutoloadOutputInterceptors(
       Boolean autoloadOutputInterceptors) {
     this.autoloadOutputInterceptors = autoloadOutputInterceptors;
     return this;
@@ -66,7 +66,7 @@ public class StreamedBeanLambdaFunctionConfiguration {
     this.autoloadRequestFilters = autoloadRequestFilters;
   }
 
-  public StreamedBeanLambdaFunctionConfiguration withAutoloadRequestFilters(
+  public StreamedBeanLambdaProcessorConfiguration withAutoloadRequestFilters(
       Boolean autoloadRequestFilters) {
     this.autoloadRequestFilters = autoloadRequestFilters;
     return this;
@@ -80,7 +80,7 @@ public class StreamedBeanLambdaFunctionConfiguration {
     this.autoloadResponseFilters = autoloadResponseFilters;
   }
 
-  public StreamedBeanLambdaFunctionConfiguration withAutoloadResponseFilters(
+  public StreamedBeanLambdaProcessorConfiguration withAutoloadResponseFilters(
       Boolean autoloadResponseFilters) {
     this.autoloadResponseFilters = autoloadResponseFilters;
     return this;
@@ -94,7 +94,7 @@ public class StreamedBeanLambdaFunctionConfiguration {
     this.autoloadExceptionMappers = autoloadExceptionMappers;
   }
 
-  public StreamedBeanLambdaFunctionConfiguration withAutoloadExceptionMappers(
+  public StreamedBeanLambdaProcessorConfiguration withAutoloadExceptionMappers(
       Boolean autoloadExceptionMappers) {
     this.autoloadExceptionMappers = autoloadExceptionMappers;
     return this;
@@ -114,7 +114,7 @@ public class StreamedBeanLambdaFunctionConfiguration {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    StreamedBeanLambdaFunctionConfiguration other = (StreamedBeanLambdaFunctionConfiguration) obj;
+    StreamedBeanLambdaProcessorConfiguration other = (StreamedBeanLambdaProcessorConfiguration) obj;
     return Objects.equals(autoloadExceptionMappers, other.autoloadExceptionMappers)
         && Objects.equals(autoloadInputInterceptors, other.autoloadInputInterceptors)
         && Objects.equals(autoloadOutputInterceptors, other.autoloadOutputInterceptors)

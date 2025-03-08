@@ -51,7 +51,7 @@ import com.sigpwned.lammy.core.util.MoreObjects;
 /**
  * A basic implementation of a Lambda function that handles streaming input and output.
  */
-public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT>
+public abstract class StreamedBeanLambdaProcessorBase<RequestT, ResponseT>
     extends StreamedBeanLambdaBase<RequestT, ResponseT> implements RequestStreamHandler {
   private final Type responseType;
   private final List<OutputInterceptor> outputInterceptors;
@@ -59,48 +59,48 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT>
   private final List<ExceptionMapper<?, ResponseT>> exceptionMappers;
   boolean initialized;
 
-  protected StreamedBeanLambdaFunctionBase() {
-    this(new StreamedBeanLambdaFunctionConfiguration());
+  protected StreamedBeanLambdaProcessorBase() {
+    this(new StreamedBeanLambdaProcessorConfiguration());
   }
 
-  protected StreamedBeanLambdaFunctionBase(StreamedBeanLambdaFunctionConfiguration configuration) {
+  protected StreamedBeanLambdaProcessorBase(StreamedBeanLambdaProcessorConfiguration configuration) {
     this((ContextAwareCustomPojoSerializer) null, null, null, configuration);
   }
 
-  protected StreamedBeanLambdaFunctionBase(CustomPojoSerializer serializer) {
-    this(serializer, new StreamedBeanLambdaFunctionConfiguration());
+  protected StreamedBeanLambdaProcessorBase(CustomPojoSerializer serializer) {
+    this(serializer, new StreamedBeanLambdaProcessorConfiguration());
   }
 
-  protected StreamedBeanLambdaFunctionBase(CustomPojoSerializer serializer,
-      StreamedBeanLambdaFunctionConfiguration configuration) {
+  protected StreamedBeanLambdaProcessorBase(CustomPojoSerializer serializer,
+      StreamedBeanLambdaProcessorConfiguration configuration) {
     this(serializer, null, null, configuration);
   }
 
-  protected StreamedBeanLambdaFunctionBase(Type requestType, Type responseType) {
-    this(requestType, responseType, new StreamedBeanLambdaFunctionConfiguration());
+  protected StreamedBeanLambdaProcessorBase(Type requestType, Type responseType) {
+    this(requestType, responseType, new StreamedBeanLambdaProcessorConfiguration());
   }
 
-  protected StreamedBeanLambdaFunctionBase(Type requestType, Type responseType,
-      StreamedBeanLambdaFunctionConfiguration configuration) {
+  protected StreamedBeanLambdaProcessorBase(Type requestType, Type responseType,
+      StreamedBeanLambdaProcessorConfiguration configuration) {
     this((ContextAwareCustomPojoSerializer) null, requestType, responseType, configuration);
   }
 
-  protected StreamedBeanLambdaFunctionBase(CustomPojoSerializer serializer, Type requestType,
-      Type responseType, StreamedBeanLambdaFunctionConfiguration configuration) {
+  protected StreamedBeanLambdaProcessorBase(CustomPojoSerializer serializer, Type requestType,
+      Type responseType, StreamedBeanLambdaProcessorConfiguration configuration) {
     this(
         Optional.ofNullable(serializer)
             .map(ContextAwareCustomPojoSerializer::fromCustomPojoSerializer).orElse(null),
         requestType, responseType, configuration);
   }
 
-  protected StreamedBeanLambdaFunctionBase(ContextAwareCustomPojoSerializer serializer,
-      Type requestType, Type responseType, StreamedBeanLambdaFunctionConfiguration configuration) {
+  protected StreamedBeanLambdaProcessorBase(ContextAwareCustomPojoSerializer serializer,
+      Type requestType, Type responseType, StreamedBeanLambdaProcessorConfiguration configuration) {
     super(serializer, requestType,
-        StreamedBeanLambdaConfiguration.fromFunctionConfiguration(configuration));
+        StreamedBeanLambdaConfiguration.fromProcessorConfiguration(configuration));
 
     if (responseType == null)
       responseType = GenericTypes
-          .findGenericParameter(getClass(), StreamedBeanLambdaFunctionBase.class, 1).orElseThrow(
+          .findGenericParameter(getClass(), StreamedBeanLambdaProcessorBase.class, 1).orElseThrow(
               () -> new AssertionError("Failed to compute responseType for " + getClass()));
     this.responseType = responseType;
 

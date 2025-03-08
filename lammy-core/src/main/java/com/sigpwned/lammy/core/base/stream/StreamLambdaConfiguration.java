@@ -22,8 +22,8 @@ package com.sigpwned.lammy.core.base.stream;
 import java.util.Objects;
 
 /* default */ class StreamLambdaConfiguration {
-  public static StreamLambdaConfiguration fromFunctionConfiguration(
-      StreamLambdaFunctionConfiguration c) {
+  public static StreamLambdaConfiguration fromProcessorConfiguration(
+      StreamLambdaProcessorConfiguration c) {
     return new StreamLambdaConfiguration()
         .withAutoloadInputInterceptors(c.getAutoloadInputInterceptors());
   }
