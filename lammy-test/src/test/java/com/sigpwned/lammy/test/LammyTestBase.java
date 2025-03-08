@@ -17,17 +17,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.ServiceLoader;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Pattern;
 import java.util.zip.ZipException;
-import javax.annotation.processing.Processor;
 import javax.tools.JavaFileObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -437,9 +434,15 @@ public abstract class LammyTestBase {
         jar.putNextEntry(otherEntry);
       } catch (ZipException e) {
         if (e.getMessage().contains("duplicate entry")) {
-          // Ignore this and carry on.
-          System.err
-              .println("WARNING: Ignoring duplicate entry in JAR file: " + otherEntry.getName());
+          // What is our duplicate entry?
+          if (otherEntry.getName().equals("META-INF/MANIFEST.MF")) {
+            // We have a bunch of duplicate manifests, which doesn't hurt anything. Don't blow up
+            // the build logs about it.
+          } else {
+            // I don't recognize this. Let's log it.
+            System.err
+                .println("WARNING: Ignoring duplicate entry in JAR file: " + otherEntry.getName());
+          }
           continue;
         }
         throw e;
@@ -449,41 +452,6 @@ public abstract class LammyTestBase {
       }
       jar.closeEntry();
     }
-  }
-
-  /**
-   * Returns the annotation processors to use when compiling the source code. We will use any
-   * annotation available via ServiceLoader, plus the Dagger processor.
-   */
-  protected List<Processor> getAnnotationProcessors() {
-    final List<Processor> result = new ArrayList<>();
-    for (Processor processor : ServiceLoader.load(Processor.class))
-      result.add(processor);
-
-    // We only want to run dagger and rapier processors.
-    final Iterator<Processor> iterator = result.iterator();
-    while (iterator.hasNext()) {
-      final Processor processor = iterator.next();
-      final String processorClassName = processor.getClass().getName();
-
-      // Skip any annotation processors we don't recognize
-      if (processorClassName.startsWith("dagger.")) {
-        // This is a dagger processor. Let's keep it, obviously.
-      } else if (processorClassName.startsWith("rapier.")) {
-        // This is a rapier processor. Let's keep it, obviously.
-      } else if (processorClassName.startsWith("com.google.")) {
-        // We want to see if rapier and dagger work on a standalone basis.
-        // We recognize and trust these, but let's skip them.
-        iterator.remove();
-      } else {
-        // What are you...?
-        System.err
-            .println("WARNING: Skipping unrecognized annotation processor: " + processorClassName);
-        iterator.remove();
-      }
-    }
-
-    return unmodifiableList(result);
   }
 
   private final Random random = new Random();
