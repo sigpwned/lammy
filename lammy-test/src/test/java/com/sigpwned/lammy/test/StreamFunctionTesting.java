@@ -130,6 +130,7 @@ public interface StreamFunctionTesting extends CodeGenerating {
         + "\n"
         + "import com.amazonaws.services.lambda.runtime.Context;\n"
         + "import com.sigpwned.lammy.core.model.stream.OutputInterceptor;\n"
+        + "import com.sigpwned.lammy.core.model.stream.InputContext;\n"
         + "import com.sigpwned.lammy.core.model.stream.OutputContext;\n"
         + "import java.util.List;\n"
         + "import java.util.Map;\n"
@@ -140,7 +141,7 @@ public interface StreamFunctionTesting extends CodeGenerating {
         + "  }\n"
         + "\n"
         + "  @Override\n"
-        + "  public void interceptResponse(OutputContext outputContext, Context lambdaContext) {\n"
+        + "  public void interceptResponse(InputContext inputContext, OutputContext outputContext, Context lambdaContext) {\n"
         + "    System.out.println(\"" + outputInterceptorInterceptMessage(nonce, id) + "\");\n"
         + "    " + body
         + "  }\n"
@@ -153,7 +154,7 @@ public interface StreamFunctionTesting extends CodeGenerating {
   }
 
   public default String outputInterceptorSimpleClassName(String id) {
-    return "ExampleResponseFilter" + id;
+    return "ExampleOutputInterceptor" + id;
   }
 
   public default String outputInterceptorInitMessage(String nonce, String id) {

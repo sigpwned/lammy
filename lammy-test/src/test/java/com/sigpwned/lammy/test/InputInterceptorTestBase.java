@@ -46,16 +46,16 @@ public abstract class InputInterceptorTestBase extends LammyTestBase
       Boolean autoloadInputInterceptors, Boolean autoloadResponseFilters,
       Boolean autoloadExceptionMappers);
 
-  // REQUEST FILTERS TESTS /////////////////////////////////////////////////////////////////////////
+  // INPUT INTERCEPTOR TESTS ///////////////////////////////////////////////////////////////////////
 
   protected String buildAndInvokeGreetingProcessorWithTwoInputInterceptors(String nonce,
       Boolean autoloadAll, Boolean autoloadInputInterceptors, String firstInputInterceptorId,
       String secondInputInterceptorId, String name) throws IOException {
-    final Boolean autoloadResponseFilters = null;
-    final Boolean autoloadExceptionMappers = null;
+    final Boolean autoloadOutputInterceptors = null;
+    final Boolean autoloadExceptionWriters = null;
 
     final JavaFileObject handler = prepareSourceFile(greetingProcessorSource(autoloadAll,
-        autoloadInputInterceptors, autoloadResponseFilters, autoloadExceptionMappers));
+        autoloadInputInterceptors, autoloadOutputInterceptors, autoloadExceptionWriters));
 
     final JavaFileObject requestFilterA =
         prepareSourceFile(inputInterceptorSource(nonce, firstInputInterceptorId));
