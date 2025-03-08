@@ -53,14 +53,14 @@ public abstract class StreamLambdaFunctionBase extends StreamLambdaBase {
   protected StreamLambdaFunctionBase(StreamLambdaFunctionConfiguration configuration) {
     super(StreamLambdaConfiguration.fromFunctionConfiguration(configuration));
     outputInterceptors = new ArrayList<>();
-    if (MoreObjects.coalesce(configuration.getAutoloadOutputInterceptors(), AUTOLOAD_ALL)
+    if (MoreObjects.coalesce(configuration.getAutoloadOutputInterceptors(), getAutoloadAll())
         .orElse(false)) {
       ServiceLoader.load(OutputInterceptor.class).iterator()
           .forEachRemaining(this::registerOutputInterceptor);
     }
 
     exceptionWriters = new ArrayList<>();
-    if (MoreObjects.coalesce(configuration.getAutoloadExceptionWriters(), AUTOLOAD_ALL)
+    if (MoreObjects.coalesce(configuration.getAutoloadExceptionWriters(), getAutoloadAll())
         .orElse(false)) {
       ServiceLoader.load(ExceptionWriter.class).iterator()
           .forEachRemaining(this::registerExceptionWriter);

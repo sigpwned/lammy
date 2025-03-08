@@ -78,13 +78,13 @@ public abstract class BeanLambdaFunctionBase<RequestT, ResponseT>
     this.responseType = requireNonNull(responseType);
 
     responseFilters = new ArrayList<>();
-    if (MoreObjects.coalesce(configuration.getAutoloadResponseFilters(), AUTOLOAD_ALL)
+    if (MoreObjects.coalesce(configuration.getAutoloadResponseFilters(), getAutoloadAll())
         .orElse(false)) {
       ServiceLoader.load(ResponseFilter.class).iterator().forEachRemaining(responseFilters::add);
     }
 
     exceptionMappers = new ArrayList<>();
-    if (MoreObjects.coalesce(configuration.getAutoloadExceptionMappers(), AUTOLOAD_ALL)
+    if (MoreObjects.coalesce(configuration.getAutoloadExceptionMappers(), getAutoloadAll())
         .orElse(false)) {
       ServiceLoader.load(ExceptionMapper.class).iterator().forEachRemaining(exceptionMappers::add);
     }

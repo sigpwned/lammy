@@ -71,7 +71,7 @@ import com.sigpwned.lammy.core.util.MoreObjects;
     this.requestType = requireNonNull(requestType);
 
     requestFilters = new ArrayList<>();
-    if (MoreObjects.coalesce(configuration.getAutoloadRequestFilters(), AUTOLOAD_ALL)
+    if (MoreObjects.coalesce(configuration.getAutoloadRequestFilters(), getAutoloadAll())
         .orElse(false)) {
       ServiceLoader.load(RequestFilter.class).iterator().forEachRemaining(requestFilters::add);
     }

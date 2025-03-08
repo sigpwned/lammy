@@ -37,7 +37,7 @@ import com.sigpwned.lammy.core.util.MoreObjects;
 
   public StreamLambdaBase(StreamLambdaConfiguration configuration) {
     this.inputInterceptors = new ArrayList<>();
-    if (MoreObjects.coalesce(configuration.getAutoloadInputInterceptors(), AUTOLOAD_ALL)
+    if (MoreObjects.coalesce(configuration.getAutoloadInputInterceptors(), getAutoloadAll())
         .orElse(false)) {
       ServiceLoader.load(InputInterceptor.class).iterator()
           .forEachRemaining(this::registerInputInterceptor);

@@ -25,9 +25,6 @@ import org.crac.Resource;
 import com.sigpwned.lammy.core.model.OptionalEnvironmentVariable;
 
 public abstract class LambdaFunctionBase implements Resource {
-  protected static final Boolean AUTOLOAD_ALL = OptionalEnvironmentVariable
-      .getenv("LAMMY_AUTOLOAD_ALL").map(Boolean::parseBoolean).orElse(null);
-
   protected LambdaFunctionBase() {
     // Register ourselves as a CRaC handler for SnapStart
     Core.getGlobalContext().register(this);
@@ -38,4 +35,12 @@ public abstract class LambdaFunctionBase implements Resource {
 
   @Override
   public void afterRestore(Context<? extends Resource> context) throws Exception {}
+
+  /**
+   * test hook
+   */
+  protected Boolean getAutoloadAll() {
+    return OptionalEnvironmentVariable.getenv("LAMMY_AUTOLOAD_ALL").map(Boolean::parseBoolean)
+        .orElse(null);
+  }
 }

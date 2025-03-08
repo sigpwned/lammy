@@ -60,14 +60,14 @@ import com.sigpwned.lammy.core.util.MoreObjects;
     this.requestType = requestType;
 
     this.inputInterceptors = new ArrayList<>();
-    if (MoreObjects.coalesce(configuration.getAutoloadInputInterceptors(), AUTOLOAD_ALL)
+    if (MoreObjects.coalesce(configuration.getAutoloadInputInterceptors(), getAutoloadAll())
         .orElse(false)) {
       ServiceLoader.load(InputInterceptor.class).iterator()
           .forEachRemaining(inputInterceptors::add);
     }
 
     this.requestFilters = new ArrayList<>();
-    if (MoreObjects.coalesce(configuration.getAutoloadRequestFilters(), AUTOLOAD_ALL)
+    if (MoreObjects.coalesce(configuration.getAutoloadRequestFilters(), getAutoloadAll())
         .orElse(false)) {
       ServiceLoader.load(RequestFilter.class).iterator().forEachRemaining(requestFilters::add);
     }

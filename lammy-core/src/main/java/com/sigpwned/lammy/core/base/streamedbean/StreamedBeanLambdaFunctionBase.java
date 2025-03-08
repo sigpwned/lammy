@@ -105,21 +105,21 @@ public abstract class StreamedBeanLambdaFunctionBase<RequestT, ResponseT>
     this.responseType = responseType;
 
     outputInterceptors = new ArrayList<>();
-    if (MoreObjects.coalesce(configuration.getAutoloadOutputInterceptors(), AUTOLOAD_ALL)
+    if (MoreObjects.coalesce(configuration.getAutoloadOutputInterceptors(), getAutoloadAll())
         .orElse(false)) {
       ServiceLoader.load(OutputInterceptor.class).iterator()
           .forEachRemaining(this::registerOutputInterceptor);
     }
 
     responseFilters = new ArrayList<>();
-    if (MoreObjects.coalesce(configuration.getAutoloadResponseFilters(), AUTOLOAD_ALL)
+    if (MoreObjects.coalesce(configuration.getAutoloadResponseFilters(), getAutoloadAll())
         .orElse(false)) {
       ServiceLoader.load(ResponseFilter.class).iterator()
           .forEachRemaining(this::registerResponseFilter);
     }
 
     exceptionMappers = new ArrayList<>();
-    if (MoreObjects.coalesce(configuration.getAutoloadExceptionMappers(), AUTOLOAD_ALL)
+    if (MoreObjects.coalesce(configuration.getAutoloadExceptionMappers(), getAutoloadAll())
         .orElse(false)) {
       ServiceLoader.load(ExceptionMapper.class).iterator()
           .forEachRemaining(this::registerExceptionMapper);

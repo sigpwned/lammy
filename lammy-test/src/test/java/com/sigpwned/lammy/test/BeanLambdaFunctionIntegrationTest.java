@@ -34,10 +34,9 @@ import com.google.testing.compile.CompilationSubject;
 import com.sigpwned.just.json.JustJson;
 
 @Testcontainers
-public class LambdaIntegrationTest extends LammyTestBase {
+public class BeanLambdaFunctionIntegrationTest extends LammyTestBase {
   @Test
-  public void givenBeanLambdaFunctionBaseExample_whenBuildAndInvoke_thenGetExpectedResult()
-      throws IOException {
+  public void givenExample_whenBuildAndInvoke_thenGetExpectedResult() throws IOException {
     // @formatter:off
     final JavaFileObject handler = prepareSourceFile(""
         + "package com.example;\n"
@@ -74,47 +73,8 @@ public class LambdaIntegrationTest extends LammyTestBase {
   }
 
   @Test
-  public void givenBeanLambdaConsumerBaseExample_whenBuildAndInvoke_thenGetExpectedResult()
-      throws IOException {
-    final String nonce = nonce();
-
-    // @formatter:off
-    final JavaFileObject handler = prepareSourceFile(""
-        + "package com.example;\n"
-        + "\n"
-        + "import com.amazonaws.services.lambda.runtime.Context;\n"
-        + "import com.amazonaws.services.lambda.runtime.RequestHandler;\n"
-        + "import com.sigpwned.lammy.core.base.bean.BeanLambdaConsumerBase;\n"
-        + "import java.util.Map;\n"
-        + "\n"
-        + "public class LambdaFunction extends BeanLambdaConsumerBase<Map<String, Object>> {\n"
-        + "  @Override\n"
-        + "  public void consumeBeanRequest(Map<String, Object> input, Context context) {\n"
-        + "    String name = input.get(\"name\") != null ? input.get(\"name\").toString() : \"world\";\n"
-        + "    System.out.println(\"" + nonce+ ": Hello, \" + name + \"!\");\n"
-        + "  }\n"
-        + "}\n");
-    // @formatter:on
-
-    final Compilation compilation = doCompile(handler);
-
-    CompilationSubject.assertThat(compilation).succeeded();
-
-    final File deploymentPackage = createDeploymentPackage(compilation);
-    try {
-      final String functionName = doDeployLambdaFunction(deploymentPackage);
-
-      doInvokeLambdaFunction(functionName, "{\"name\":\"Test\"}");
-    } finally {
-      deploymentPackage.delete();
-    }
-
-    assertThat(localstack.getLogs()).contains(nonce + ": Hello, Test!");
-  }
-
-  @Test
   @Disabled("Does LocalStack support custom serializers?")
-  public void givenFunctionWithCustomSerializerWithServiceLoad_whenBuildAndInvoke_thenCustomSerializerIsUsed()
+  public void givenCustomSerializerWithServiceLoad_whenBuildAndInvoke_thenCustomSerializerIsUsed()
       throws IOException {
     final String nonce = nonce();
 
@@ -212,7 +172,7 @@ public class LambdaIntegrationTest extends LammyTestBase {
   }
 
   @Test
-  public void givenFunctionWithRequestFiltersWithServiceLoadAndExplicitlyEnabledOrderAB_whenBuildAndInvoke_thenFiltersAreCalledInCorrectOrder()
+  public void givenRequestFiltersWithServiceLoadAndExplicitlyEnabledOrderAB_whenBuildAndInvoke_thenFiltersAreCalledInCorrectOrder()
       throws IOException {
     final String nonce = nonce();
 
@@ -306,7 +266,7 @@ public class LambdaIntegrationTest extends LammyTestBase {
   }
 
   @Test
-  public void givenFunctionWithRequestFiltersWithServiceLoadAndExplicitlyEnabledOrderBA_whenBuildAndInvoke_thenFiltersAreCalledInCorrectOrder()
+  public void givenRequestFiltersWithServiceLoadAndExplicitlyEnabledOrderBA_whenBuildAndInvoke_thenFiltersAreCalledInCorrectOrder()
       throws IOException {
     final String nonce = nonce();
 
@@ -400,7 +360,7 @@ public class LambdaIntegrationTest extends LammyTestBase {
   }
 
   @Test
-  public void givenFunctionWithRequestFiltersWithServiceLoadAndExplicitlyDisabled_whenBuildAndInvoke_thenFiltersAreNotCalled()
+  public void givenRequestFiltersWithServiceLoadAndExplicitlyDisabled_whenBuildAndInvoke_thenFiltersAreNotCalled()
       throws IOException {
     final String nonce = nonce();
 
@@ -489,7 +449,7 @@ public class LambdaIntegrationTest extends LammyTestBase {
   }
 
   @Test
-  public void givenFunctionWithResponseFiltersWithServiceLoadAndExplicitlyEnabledOrderAB_whenBuildAndInvoke_thenFiltersAreCalledInCorrectOrder()
+  public void givenResponseFiltersWithServiceLoadAndExplicitlyEnabledOrderAB_whenBuildAndInvoke_thenFiltersAreCalledInCorrectOrder()
       throws IOException {
     final String nonce = nonce();
 
@@ -589,7 +549,7 @@ public class LambdaIntegrationTest extends LammyTestBase {
   }
 
   @Test
-  public void givenFunctionWithResponseFiltersWithServiceLoadAndExplicitlyEnabledOrderBA_whenBuildAndInvoke_thenFiltersAreCalledInCorrectOrder()
+  public void givenResponseFiltersWithServiceLoadAndExplicitlyEnabledOrderBA_whenBuildAndInvoke_thenFiltersAreCalledInCorrectOrder()
       throws IOException {
     final String nonce = nonce();
 
@@ -689,7 +649,7 @@ public class LambdaIntegrationTest extends LammyTestBase {
   }
 
   @Test
-  public void givenFunctionWithResponseFiltersWithServiceLoadAndExplicitlyDisabled_whenBuildAndInvoke_thenFiltersAreNotCalled()
+  public void givenResponseFiltersWithServiceLoadAndExplicitlyDisabled_whenBuildAndInvoke_thenFiltersAreNotCalled()
       throws IOException {
     final String nonce = nonce();
 
@@ -784,7 +744,7 @@ public class LambdaIntegrationTest extends LammyTestBase {
   }
 
   @Test
-  public void givenFunctionWithExceptionMappersWithServiceLoadAndExplicitlyEnabledOrderAB_whenBuildAndInvokeAndThrowMatchingAB_thenAUsed()
+  public void givenExceptionMappersWithServiceLoadAndExplicitlyEnabledOrderAB_whenBuildAndInvokeAndThrowMatchingAB_thenAUsed()
       throws IOException {
     final String nonce = nonce();
 
@@ -874,7 +834,7 @@ public class LambdaIntegrationTest extends LammyTestBase {
   }
 
   @Test
-  public void givenFunctionWithExceptionMappersWithServiceLoadAndExplicitlyEnabledOrderAB_whenBuildAndInvokeAndThrowMatchingB_thenBUsed()
+  public void givenExceptionMappersWithServiceLoadAndExplicitlyEnabledOrderAB_whenBuildAndInvokeAndThrowMatchingB_thenBUsed()
       throws IOException {
     final String nonce = nonce();
 
@@ -964,7 +924,7 @@ public class LambdaIntegrationTest extends LammyTestBase {
   }
 
   @Test
-  public void givenFunctionWithExceptionMappersWithServiceLoadAndExplicitlyEnabledOrderBA_whenBuildAndInvokeAndThrowMatchingAB_thenBUsed()
+  public void givenExceptionMappersWithServiceLoadAndExplicitlyEnabledOrderBA_whenBuildAndInvokeAndThrowMatchingAB_thenBUsed()
       throws IOException {
     final String nonce = nonce();
 
@@ -1054,7 +1014,7 @@ public class LambdaIntegrationTest extends LammyTestBase {
   }
 
   @Test
-  public void givenFunctionWithExceptionMappersWithServiceLoadAndExplicitlyEnabledOrderAB_whenBuildAndInvokeAndThrowMatchingNone_thenPropagated()
+  public void givenExceptionMappersWithServiceLoadAndExplicitlyEnabledOrderAB_whenBuildAndInvokeAndThrowMatchingNone_thenPropagated()
       throws IOException {
     final String nonce = nonce();
 
@@ -1145,5 +1105,265 @@ public class LambdaIntegrationTest extends LammyTestBase {
 
     assertThat(localstack.getLogs()).doesNotContain(requestFilterALog);
     assertThat(localstack.getLogs()).doesNotContain(requestFilterBLog);
+  }
+
+  @Test
+  public void givenRequestFiltersAndResponseFiltersAndExceptionMappersWithServiceLoadAndBlanketEnabled_whenBuildAndInvoke_thenFiltersAreCalled()
+      throws IOException {
+    final String nonce = nonce();
+
+    final Boolean autoloadAll = true;
+    final Boolean autoloadRequestFilters = null;
+
+    // @formatter:off
+    final JavaFileObject handler = prepareSourceFile(""
+        + "package com.example;\n"
+        + "\n"
+        + "import com.amazonaws.services.lambda.runtime.Context;\n"
+        + "import com.amazonaws.services.lambda.runtime.RequestHandler;\n"
+        + "import com.sigpwned.lammy.core.base.bean.BeanLambdaFunctionBase;\n"
+        + "import com.sigpwned.lammy.core.base.bean.BeanLambdaFunctionConfiguration;\n"
+        + "import java.util.Map;\n"
+        + "\n"
+        + "public class LambdaFunction extends BeanLambdaFunctionBase<Map<String, Object>, String> {\n"
+        + "  public LambdaFunction() {\n"
+        + "    super(new BeanLambdaFunctionConfiguration().withAutoloadRequestFilters(" + autoloadRequestFilters + "));\n"
+        + "  }\n"
+        + "\n"
+        + "  @Override\n"
+        + "  public String handleBeanRequest(Map<String, Object> input, Context context) {\n"
+        + "    String name = input.get(\"name\") != null ? input.get(\"name\").toString() : \"world\";\n"
+        + "    return \"Hello, \" + name + \"!\";\n"
+        + "  }\n"
+        + "\n"
+        + "  @Override\n"
+        + "  protected Boolean getAutoloadAll() {\n"
+        + "    return " + autoloadAll + ";\n"
+        + "  }\n"
+        + "}\n");
+
+    final JavaFileObject requestFilter = prepareSourceFile(""
+        + "package com.example;\n"
+        + "\n"
+        + "import com.sigpwned.lammy.core.model.bean.RequestFilter;\n"
+        + "import com.sigpwned.lammy.core.model.bean.RequestContext;\n"
+        + "import com.amazonaws.services.lambda.runtime.Context;\n"
+        + "import java.util.Map;\n"
+        + "\n"
+        + "public class ExampleRequestFilter implements RequestFilter<Map<String, Object>> {\n"
+        + "  @Override\n"
+        + "  public void filterRequest(RequestContext<Map<String, Object>> requestContext, Context lambdaContext) {\n"
+        + "    System.out.println(\"" + nonce + ": ExampleRequestFilter.filterRequest\");\n"
+        + "  }\n"
+        + "}\n");
+
+    final JavaFileObject responseFilter = prepareSourceFile(""
+        + "package com.example;\n"
+        + "\n"
+        + "import com.sigpwned.lammy.core.model.bean.RequestFilter;\n"
+        + "import com.sigpwned.lammy.core.model.bean.RequestContext;\n"
+        + "import com.sigpwned.lammy.core.model.bean.ResponseFilter;\n"
+        + "import com.sigpwned.lammy.core.model.bean.ResponseContext;\n"
+        + "import com.amazonaws.services.lambda.runtime.Context;\n"
+        + "import java.util.Map;\n"
+        + "\n"
+        + "public class ExampleResponseFilter implements ResponseFilter<Map<String, Object>, String> {\n"
+        + "  @Override\n"
+        + "  public void filterResponse(RequestContext<Map<String, Object>> requestContext, \n"
+        + "      ResponseContext<String> responseContext, Context lambdaContext) {\n"
+        + "    System.out.println(\"" + nonce + ": ExampleResponseFilter.filterResponse\");\n"
+        + "  }\n"
+        + "}\n");
+
+    final JavaFileObject exceptionMapper = prepareSourceFile(""
+        + "package com.example;\n"
+        + "\n"
+        + "import com.sigpwned.lammy.core.model.bean.ExceptionMapper;\n"
+        + "import com.amazonaws.services.lambda.runtime.Context;\n"
+        + "import java.io.IOException;\n"
+        + "import java.lang.reflect.Type;\n"
+        + "\n"
+        + "public class ExampleExceptionMapper implements ExceptionMapper<Exception, String> {\n"
+        + "  public ExampleExceptionMapper() {\n"
+        + "    System.out.println(\"" + nonce + ": ExampleExceptionMapper.new\");\n"
+        + "  }\n"
+        + "\n"
+        + "  @Override\n"
+        + "  public String mapExceptionTo(Exception e, Type responseType, Context context) {\n"
+        + "    System.out.println(\"" + nonce + ": ExampleExceptionMapper.mapExceptionTo\");\n"
+        + "    return \"Exception Mapper: \" + e.getMessage();\n"
+        + "  }\n"
+        + "}\n");
+    // @formatter:on
+
+    final Compilation compilation =
+        doCompile(handler, requestFilter, responseFilter, exceptionMapper);
+
+    CompilationSubject.assertThat(compilation).succeeded();
+
+    // Order matters here. Call A then B.
+    final ExtraJarEntry requestFilterService = new ExtraJarEntry(
+        new JarEntry("META-INF/services/com.sigpwned.lammy.core.model.bean.RequestFilter"),
+        "com.example.ExampleRequestFilter".getBytes(StandardCharsets.UTF_8));
+    final ExtraJarEntry responseFilterService = new ExtraJarEntry(
+        new JarEntry("META-INF/services/com.sigpwned.lammy.core.model.bean.ResponseFilter"),
+        "com.example.ExampleResponseFilter".getBytes(StandardCharsets.UTF_8));
+    final ExtraJarEntry errorMapperService = new ExtraJarEntry(
+        new JarEntry("META-INF/services/com.sigpwned.lammy.core.model.bean.ExceptionMapper"),
+        "com.example.ExampleExceptionMapper".getBytes(StandardCharsets.UTF_8));
+
+    final String output;
+    final File deploymentPackage = createDeploymentPackage(compilation, requestFilterService,
+        responseFilterService, errorMapperService);
+    try {
+      final String functionName = doDeployLambdaFunction(deploymentPackage);
+
+      output = doInvokeLambdaFunction(functionName, "{\"name\":\"Test\"}");
+    } finally {
+      deploymentPackage.delete();
+    }
+
+    final String exceptionMapperNewLog = nonce + ": ExampleExceptionMapper.new";
+    final String requestFilterLog = nonce + ": ExampleRequestFilter.filterRequest";
+    final String responseFilterLog = nonce + ": ExampleResponseFilter.filterResponse";
+    final String exceptionMapperLog = nonce + ": ExampleExceptionMapper.mapExceptionTo";
+
+    assertThat(output).isEqualTo("\"Hello, Test!\"");
+    assertThat(localstack.getLogs()).contains(exceptionMapperNewLog);
+    assertThat(localstack.getLogs()).contains(requestFilterLog);
+    assertThat(localstack.getLogs()).contains(responseFilterLog);
+    assertThat(localstack.getLogs()).doesNotContain(exceptionMapperLog);
+
+    final int requestFilterIndex = localstack.getLogs().indexOf(requestFilterLog);
+    final int responseFilterIndex = localstack.getLogs().indexOf(responseFilterLog);
+
+    assertThat(requestFilterIndex).isLessThan(responseFilterIndex);
+  }
+
+  @Test
+  public void givenRequestFiltersAndResponseFiltersAndExceptionMappersWithServiceLoadAndBlanketEnabled_whenBuildAndInvokeAndThrow_thenExceptionMapperIsCalled()
+      throws IOException {
+    final String nonce = nonce();
+
+    final Boolean autoloadAll = true;
+    final Boolean autoloadRequestFilters = null;
+
+    // @formatter:off
+    final JavaFileObject handler = prepareSourceFile(""
+        + "package com.example;\n"
+        + "\n"
+        + "import com.amazonaws.services.lambda.runtime.Context;\n"
+        + "import com.amazonaws.services.lambda.runtime.RequestHandler;\n"
+        + "import com.sigpwned.lammy.core.base.bean.BeanLambdaFunctionBase;\n"
+        + "import com.sigpwned.lammy.core.base.bean.BeanLambdaFunctionConfiguration;\n"
+        + "import java.util.Map;\n"
+        + "\n"
+        + "public class LambdaFunction extends BeanLambdaFunctionBase<Map<String, Object>, String> {\n"
+        + "  public LambdaFunction() {\n"
+        + "    super(new BeanLambdaFunctionConfiguration().withAutoloadRequestFilters(" + autoloadRequestFilters + "));\n"
+        + "  }\n"
+        + "\n"
+        + "  @Override\n"
+        + "  public String handleBeanRequest(Map<String, Object> input, Context context) {\n"
+        + "    String name = input.get(\"name\") != null ? input.get(\"name\").toString() : \"world\";\n"
+        + "    throw new IllegalArgumentException(\"Invalid name: \" + name);\n"
+        + "  }\n"
+        + "\n"
+        + "  @Override\n"
+        + "  protected Boolean getAutoloadAll() {\n"
+        + "    return " + autoloadAll + ";\n"
+        + "  }\n"
+        + "}\n");
+
+    final JavaFileObject requestFilter = prepareSourceFile(""
+        + "package com.example;\n"
+        + "\n"
+        + "import com.sigpwned.lammy.core.model.bean.RequestFilter;\n"
+        + "import com.sigpwned.lammy.core.model.bean.RequestContext;\n"
+        + "import com.amazonaws.services.lambda.runtime.Context;\n"
+        + "import java.util.Map;\n"
+        + "\n"
+        + "public class ExampleRequestFilter implements RequestFilter<Map<String, Object>> {\n"
+        + "  @Override\n"
+        + "  public void filterRequest(RequestContext<Map<String, Object>> requestContext, Context lambdaContext) {\n"
+        + "    System.out.println(\"" + nonce + ": ExampleRequestFilter.filterRequest\");\n"
+        + "  }\n"
+        + "}\n");
+
+    final JavaFileObject responseFilter = prepareSourceFile(""
+        + "package com.example;\n"
+        + "\n"
+        + "import com.sigpwned.lammy.core.model.bean.RequestFilter;\n"
+        + "import com.sigpwned.lammy.core.model.bean.RequestContext;\n"
+        + "import com.sigpwned.lammy.core.model.bean.ResponseFilter;\n"
+        + "import com.sigpwned.lammy.core.model.bean.ResponseContext;\n"
+        + "import com.amazonaws.services.lambda.runtime.Context;\n"
+        + "import java.util.Map;\n"
+        + "\n"
+        + "public class ExampleResponseFilter implements ResponseFilter<Map<String, Object>, String> {\n"
+        + "  @Override\n"
+        + "  public void filterResponse(RequestContext<Map<String, Object>> requestContext, \n"
+        + "      ResponseContext<String> responseContext, Context lambdaContext) {\n"
+        + "    System.out.println(\"" + nonce + ": ExampleResponseFilter.filterResponse\");\n"
+        + "  }\n"
+        + "}\n");
+
+    final JavaFileObject exceptionMapper = prepareSourceFile(""
+        + "package com.example;\n"
+        + "\n"
+        + "import com.sigpwned.lammy.core.model.bean.ExceptionMapper;\n"
+        + "import com.amazonaws.services.lambda.runtime.Context;\n"
+        + "import java.io.IOException;\n"
+        + "import java.lang.reflect.Type;\n"
+        + "\n"
+        + "public class ExampleExceptionMapper implements ExceptionMapper<Exception, String> {\n"
+        + "  @Override\n"
+        + "  public String mapExceptionTo(Exception e, Type responseType, Context context) {\n"
+        + "    System.out.println(\"" + nonce + ": ExampleExceptionMapper.mapExceptionTo\");\n"
+        + "    return \"Exception Mapper: \" + e.getMessage();\n"
+        + "  }\n"
+        + "}\n");
+    // @formatter:on
+
+    final Compilation compilation =
+        doCompile(handler, requestFilter, responseFilter, exceptionMapper);
+
+    CompilationSubject.assertThat(compilation).succeeded();
+
+    // Order matters here. Call A then B.
+    final ExtraJarEntry requestFilterService = new ExtraJarEntry(
+        new JarEntry("META-INF/services/com.sigpwned.lammy.core.model.bean.RequestFilter"),
+        "com.example.ExampleRequestFilter".getBytes(StandardCharsets.UTF_8));
+    final ExtraJarEntry responseFilterService = new ExtraJarEntry(
+        new JarEntry("META-INF/services/com.sigpwned.lammy.core.model.bean.ResponseFilter"),
+        "com.example.ExampleResponseFilter".getBytes(StandardCharsets.UTF_8));
+    final ExtraJarEntry errorMapperService = new ExtraJarEntry(
+        new JarEntry("META-INF/services/com.sigpwned.lammy.core.model.bean.ExceptionMapper"),
+        "com.example.ExampleExceptionMapper".getBytes(StandardCharsets.UTF_8));
+
+    final String output;
+    final File deploymentPackage = createDeploymentPackage(compilation, requestFilterService,
+        responseFilterService, errorMapperService);
+    try {
+      final String functionName = doDeployLambdaFunction(deploymentPackage);
+
+      output = doInvokeLambdaFunction(functionName, "{\"name\":\"Test\"}");
+    } finally {
+      deploymentPackage.delete();
+    }
+
+    final String requestFilterLog = nonce + ": ExampleRequestFilter.filterRequest";
+    final String responseFilterLog = nonce + ": ExampleResponseFilter.filterResponse";
+    final String exceptionMapperLog = nonce + ": ExampleExceptionMapper.mapExceptionTo";
+
+    assertThat(output).isEqualTo("\"Exception Mapper: Invalid name: Test\"");
+    assertThat(localstack.getLogs()).contains(requestFilterLog);
+    assertThat(localstack.getLogs()).contains(responseFilterLog);
+    assertThat(localstack.getLogs()).contains(exceptionMapperLog);
+
+    final int requestFilterIndex = localstack.getLogs().indexOf(requestFilterLog);
+    final int responseFilterIndex = localstack.getLogs().indexOf(responseFilterLog);
+
+    assertThat(requestFilterIndex).isLessThan(responseFilterIndex);
   }
 }
