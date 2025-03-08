@@ -30,7 +30,7 @@ import com.google.testing.compile.Compilation;
 import com.google.testing.compile.CompilationSubject;
 
 @Testcontainers
-@Disabled("Is this the cause of errors?")
+@Disabled("We're going to rewrite this")
 public class BeanLambdaConsumerIntegrationTest extends LammyTestBase {
   @Test
   public void givenBeanLambdaConsumerBaseExample_whenBuildAndInvoke_thenGetExpectedResult()

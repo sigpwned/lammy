@@ -29,6 +29,8 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipException;
 import javax.annotation.processing.Processor;
 import javax.tools.JavaFileObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.shaded.com.google.common.io.ByteStreams;
@@ -62,6 +64,8 @@ import software.amazon.awssdk.services.lambda.model.State;
  * visible to test classes anyway.
  */
 public abstract class LammyTestBase {
+  public static final Logger LOGGER = LoggerFactory.getLogger(LammyTestBase.class);
+
   @Container
   public static LocalStackContainer localstack =
       new LocalStackContainer(DockerImageName.parse("localstack/localstack:latest"))
