@@ -30,6 +30,7 @@
                             <maven.aws-lambda-java-serialization.version>${aws-lambda-java-serialization.version}</maven.aws-lambda-java-serialization.version>
                             <maven.aws-lambda-java-log4j2.version>${aws-lambda-java-log4j2.version}</maven.aws-lambda-java-log4j2.version>
                             <maven.aws-lambda-java-runtime-interface-client.version>${aws-lambda-java-runtime-interface-client.version}</maven.aws-lambda-java-runtime-interface-client.version>
+                            <maven.just-json.version>${just-json.version}</maven.just-json.version>
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>            
@@ -91,7 +92,6 @@
         <dependency>
             <groupId>com.sigpwned</groupId>
             <artifactId>just-json</artifactId>
-            <version>0.0.1</version>
         </dependency>
 
         <!-- Toolbox -->

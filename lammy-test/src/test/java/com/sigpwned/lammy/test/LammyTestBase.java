@@ -231,20 +231,20 @@ public abstract class LammyTestBase {
 
   protected File createDeploymentPackage(Compilation compilation, ExtraJarEntry... extraEntries)
       throws IOException {
-    final List<File> classpathAsFiles = getRunClasspath(compilation);
+    final List<File> classpath = getRunClasspath(compilation);
 
     final File deploymentPackageJar = File.createTempFile("deployment.", ".jar");
     try (JarOutputStream out = new JarOutputStream(new FileOutputStream(deploymentPackageJar))) {
       // Add the compiled classes to the JAR
-      for (File file : classpathAsFiles) {
-        if (file.isDirectory()) {
-          addToJar(out, file);
-        } else if (file.isFile() && file.getName().endsWith(".jar")) {
-          try (JarFile jar = new JarFile(file)) {
+      for (File classpathEntry : classpath) {
+        if (classpathEntry.isDirectory()) {
+          addToJar(out, classpathEntry);
+        } else if (classpathEntry.isFile() && classpathEntry.getName().endsWith(".jar")) {
+          try (JarFile jar = new JarFile(classpathEntry)) {
             addToJar(out, jar);
           }
         } else {
-          throw new IOException("unrecognized classpath entry " + file);
+          throw new IOException("unrecognized classpath entry " + classpathEntry);
         }
       }
 
@@ -269,11 +269,11 @@ public abstract class LammyTestBase {
     try (JarFile jar = new JarFile(deploymentPackageJar)) {
       // Here, we're looking for a few specific entries in the JAR file:
       // - META-INF/ -- various and sundry metadata, which is all fine
-      // - com/sigpwned/lammy/ -- the lammy prefix
+      // - com/sigpwned/ -- the lammy prefix, and various testing stuff, e.g., Just JSON
       // - com/example/ -- this exmaple lambda function
       // - org/crac/ -- the Coordinated Restore at Checkpoint library
-      assertThat(jar.stream()).map(JarEntry::getName).allMatch(
-          name -> name.startsWith("com/sigpwned/lammy/") || name.startsWith("com/example/")
+      assertThat(jar.stream()).map(JarEntry::getName)
+          .allMatch(name -> name.startsWith("com/sigpwned/") || name.startsWith("com/example/")
               || name.startsWith("org/crac/") || name.startsWith("META-INF/"));
     }
 
@@ -292,7 +292,7 @@ public abstract class LammyTestBase {
     result.add(findJarInBuild("lammy-core"));
 
     // We want the crac module
-    result.add(Maven.findJarInLocalRepository("io.github.crac", "org-crac", CRAC_VERSION));
+    result.add(findJarInLocalMavenRepository("io.github.crac", "org-crac", CRAC_VERSION));
 
 
     // Extract the compiled files into a temporary directory.
@@ -337,25 +337,28 @@ public abstract class LammyTestBase {
     return null;
   }
 
-  private static final String AWS_LAMBDA_JAVA_CORE_VERSION =
+  protected static final String AWS_LAMBDA_JAVA_CORE_VERSION =
       OptionalSystemProperty.getProperty("maven.aws-lambda-java-core.version").orElseThrow();
 
-  private static final String CRAC_VERSION =
+  protected static final String CRAC_VERSION =
       OptionalSystemProperty.getProperty("maven.crac.version").orElseThrow();
+
+  protected static final String JUST_JSON_VERSION =
+      OptionalSystemProperty.getProperty("maven.just-json.version").orElseThrow();
 
   protected List<File> getCompileClasspath() throws FileNotFoundException {
     // final File daggerJar =
-    // Maven.findJarInLocalRepository("com.google.dagger", "dagger", DAGGER_VERSION);
+    // findJarInLocalMavenRepository("com.google.dagger", "dagger", DAGGER_VERSION);
     // final File javaxInjectJar =
-    // Maven.findJarInLocalRepository("javax.inject", "javax.inject", JAVAX_INJECT_VERSION);
-    // final File jakartaInjectApiJar = Maven.findJarInLocalRepository("jakarta.inject",
+    // findJarInLocalMavenRepository("javax.inject", "javax.inject", JAVAX_INJECT_VERSION);
+    // final File jakartaInjectApiJar = findJarInLocalMavenRepository("jakarta.inject",
     // "jakarta.inject-api", JAKARTA_INJECT_API_VERSION);
     // final File jsr305Jar =
-    // Maven.findJarInLocalRepository("com.google.code.findbugs", "jsr305", JSR_305_VERSION);
+    // findJarInLocalMavenRepository("com.google.code.findbugs", "jsr305", JSR_305_VERSION);
     // return Lists.of(daggerJar, javaxInjectJar, jakartaInjectApiJar, jsr305Jar);
-    final File awsLambdaJavaCoreJar = Maven.findJarInLocalRepository("com.amazonaws",
+    final File awsLambdaJavaCoreJar = findJarInLocalMavenRepository("com.amazonaws",
         "aws-lambda-java-core", AWS_LAMBDA_JAVA_CORE_VERSION);
-    final File cracJar = Maven.findJarInLocalRepository("io.github.crac", "org-crac", CRAC_VERSION);
+    final File cracJar = findJarInLocalMavenRepository("io.github.crac", "org-crac", CRAC_VERSION);
     final File lammyCoreJar = findJarInBuild("lammy-core");
     return unmodifiableList(asList(awsLambdaJavaCoreJar, cracJar, lammyCoreJar));
   }
@@ -380,6 +383,11 @@ public abstract class LammyTestBase {
       throw new FileNotFoundException("Could not find jar file for module " + moduleName);
 
     return result;
+  }
+
+  protected File findJarInLocalMavenRepository(String groupId, String artifactId, String version)
+      throws FileNotFoundException {
+    return Maven.findJarInLocalRepository(groupId, artifactId, version);
   }
 
   /**

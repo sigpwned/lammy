@@ -20,6 +20,7 @@
         <log4j2.version>2.24.3</log4j2.version>
         <jackson.version>2.18.3</jackson.version>
         <gson.version>2.12.1</gson.version>
+        <just-json.version>0.0.1</just-json.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -47,8 +48,13 @@
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
-                <version>2.12.1</version>
-            </dependency>            
+                <version>${gson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sigpwned</groupId>
+                <artifactId>just-json</artifactId>
+                <version>${just-json.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
