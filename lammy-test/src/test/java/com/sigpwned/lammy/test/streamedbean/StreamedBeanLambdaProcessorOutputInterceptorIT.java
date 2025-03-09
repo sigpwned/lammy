@@ -29,7 +29,7 @@ import com.google.testing.compile.Compilation;
 import com.sigpwned.lammy.test.OutputInterceptorTestBase;
 
 @Testcontainers
-public class StreamedBeanLambdaProcessorOutputInterceptorTest extends OutputInterceptorTestBase {
+public class StreamedBeanLambdaProcessorOutputInterceptorIT extends OutputInterceptorTestBase {
   static {
     // Enable this when needed for debugging
     // localstack.followOutput(new Slf4jLogConsumer(LOGGER));

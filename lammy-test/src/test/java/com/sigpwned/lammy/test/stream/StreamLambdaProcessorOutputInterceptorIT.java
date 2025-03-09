@@ -20,21 +20,21 @@
 package com.sigpwned.lammy.test.stream;
 
 import org.testcontainers.junit.jupiter.Testcontainers;
-import com.sigpwned.lammy.test.ExceptionWriterTestBase;
+import com.sigpwned.lammy.test.OutputInterceptorTestBase;
 
 @Testcontainers
-public class StreamLambdaProcessorExceptionWriterTest extends ExceptionWriterTestBase {
+public class StreamLambdaProcessorOutputInterceptorIT extends OutputInterceptorTestBase {
   static {
     // Enable this when needed for debugging
     // localstack.followOutput(new Slf4jLogConsumer(LOGGER));
   }
 
   @Override
-  public String throwingProcessorSource(Boolean autoloadAll, Boolean autoloadInputInterceptors,
+  public String greetingProcessorSource(Boolean autoloadAll, Boolean autoloadInputInterceptors,
       Boolean autoloadOutputInterceptors, Boolean autoloadExceptionWriters) {
     // @formatter:off
     return ""
-      + "package com.example;\n"
+      + "package " + PACKAGE_NAME + ";\n"
       + "\n"
       + "import com.amazonaws.services.lambda.runtime.Context;\n"
       + "import com.sigpwned.lammy.core.base.stream.StreamLambdaProcessorBase;\n"
@@ -59,7 +59,9 @@ public class StreamLambdaProcessorExceptionWriterTest extends ExceptionWriterTes
       + "    try {\n"
       + "      final byte[] requestBytes = toByteArray(input);\n"
       + "      final String requestText = new String(requestBytes, StandardCharsets.UTF_8);\n"
-      + "      throw new IllegalArgumentException(requestText);\n"
+      + "      final String responseText = \"Hello, \" + requestText + \"!\";\n"
+      + "      final byte[] responseBytes = responseText.getBytes(StandardCharsets.UTF_8);\n"
+      + "      output.write(responseBytes);\n"
       + "    } catch (IOException e) {\n"
       + "      throw new UncheckedIOException(e);\n"
       + "    }\n"

@@ -29,12 +29,12 @@ import com.sigpwned.lammy.test.StreamSmokeTestBase;
 
 /**
  * {@link StreamedBeanLambdaProcessorBase} supports {@link RequestFilter}, {@link ResponseFilter},
- * and {@link ExceptionMapper}, so {@link StreamedBeanLambdaProcessorBeanNatureSmokeTest} works.
+ * and {@link ExceptionMapper}, so {@link StreamedBeanLambdaProcessorBeanNatureSmokeIT} works.
  * However, {@link StreamedBeanLambdaProcessorBase} does not support {@link ExceptionWriter}, so
- * {@link StreamedBeanLambdaProcessorStreamNatureSmokeTest} does not work.
+ * {@link StreamedBeanLambdaProcessorStreamNatureSmokeIT} does not work.
  */
 @Disabled("Do not support ExceptionWriter")
-public class StreamedBeanLambdaProcessorStreamNatureSmokeTest extends StreamSmokeTestBase {
+public class StreamedBeanLambdaProcessorStreamNatureSmokeIT extends StreamSmokeTestBase {
   @Override
   public String greetingProcessorSource(Boolean autoloadAll, Boolean autoloadInputInterceptors,
       Boolean autoloadOutputInterceptors, Boolean autoloadExceptionMappers) {

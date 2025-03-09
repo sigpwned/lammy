@@ -5,7 +5,7 @@ import com.sigpwned.lammy.test.InputInterceptorTestBase;
 import com.sigpwned.lammy.test.StreamFunctionTesting;
 
 @Testcontainers
-public class StreamLambdaConsumerInputInterceptorTest extends InputInterceptorTestBase
+public class StreamLambdaConsumerInputInterceptorIT extends InputInterceptorTestBase
     implements StreamFunctionTesting {
 
   @Override

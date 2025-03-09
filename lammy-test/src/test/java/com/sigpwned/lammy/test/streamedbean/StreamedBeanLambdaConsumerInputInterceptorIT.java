@@ -11,7 +11,7 @@ import com.sigpwned.lammy.test.InputInterceptorTestBase;
 import com.sigpwned.lammy.test.StreamFunctionTesting;
 
 @Testcontainers
-public class StreamedBeanLambdaConsumerInputInterceptorTest extends InputInterceptorTestBase
+public class StreamedBeanLambdaConsumerInputInterceptorIT extends InputInterceptorTestBase
     implements StreamFunctionTesting {
   static {
     // Enable this when needed for debugging

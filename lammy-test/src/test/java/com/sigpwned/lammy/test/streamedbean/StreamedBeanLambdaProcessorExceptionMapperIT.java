@@ -17,13 +17,19 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.lammy.test.bean;
+package com.sigpwned.lammy.test.streamedbean;
 
+import static java.util.Collections.unmodifiableList;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import com.google.testing.compile.Compilation;
 import com.sigpwned.lammy.test.ExceptionMapperTestBase;
 
 @Testcontainers
-public class BeanLambdaProcessorExceptionMapperTest extends ExceptionMapperTestBase {
+public class StreamedBeanLambdaProcessorExceptionMapperIT extends ExceptionMapperTestBase {
   static {
     // Enable this when needed for debugging
     // localstack.followOutput(new Slf4jLogConsumer(LOGGER));
@@ -38,21 +44,21 @@ public class BeanLambdaProcessorExceptionMapperTest extends ExceptionMapperTestB
       + "\n"
       + "import com.amazonaws.services.lambda.runtime.Context;\n"
       + "import com.amazonaws.services.lambda.runtime.RequestHandler;\n"
-      + "import com.sigpwned.lammy.core.base.bean.BeanLambdaProcessorBase;\n"
-      + "import com.sigpwned.lammy.core.base.bean.BeanLambdaProcessorConfiguration;\n"
+      + "import com.sigpwned.lammy.core.base.streamedbean.StreamedBeanLambdaProcessorBase;\n"
+      + "import com.sigpwned.lammy.core.base.streamedbean.StreamedBeanLambdaProcessorConfiguration;\n"
       + "import java.util.List;\n"
       + "import java.util.Map;\n"
       + "\n"
-      + "public class LambdaFunction extends BeanLambdaProcessorBase<" + THROWING_PROCESSOR_REQUEST_TYPE + ", " + THROWING_PROCESSOR_RESPONSE_TYPE + "> {\n"
+      + "public class LambdaFunction extends StreamedBeanLambdaProcessorBase<" + THROWING_PROCESSOR_REQUEST_TYPE + ", " + THROWING_PROCESSOR_RESPONSE_TYPE + "> {\n"
       + "  public LambdaFunction() {\n"
-      + "    super(new BeanLambdaProcessorConfiguration()\n"
+      + "    super(new StreamedBeanLambdaProcessorConfiguration()\n"
       + "      .withAutoloadRequestFilters(" + autoloadRequestFilters + ")\n"
       + "      .withAutoloadResponseFilters(" + autoloadResponseFilters + ")\n"
       + "      .withAutoloadExceptionMappers(" + autoloadExceptionMappers + "));\n"
       + "  }\n"
       + "\n"
       + "  @Override\n"
-      + "  public " + THROWING_PROCESSOR_RESPONSE_TYPE +  " handleBeanRequest(" + THROWING_PROCESSOR_REQUEST_TYPE + " input, Context context) {\n"
+      + "  public " + THROWING_PROCESSOR_RESPONSE_TYPE +  " handleStreamedBeanRequest(" + THROWING_PROCESSOR_REQUEST_TYPE + " input, Context context) {\n"
       + "    String name = input.get(\"name\") != null ? input.get(\"name\").toString() : \"world\";\n"
       + "    throw new IllegalArgumentException(name);\n"
       + "  }\n"
@@ -63,5 +69,17 @@ public class BeanLambdaProcessorExceptionMapperTest extends ExceptionMapperTestB
       + "  }\n"
       + "}\n";
     // @formatter:on
+  }
+
+  /**
+   * We don't seem to have access to the runtime client when running in LocalStack, so we can't use
+   * the default serializer. Use Just JSON for testing.
+   */
+  @Override
+  protected List<File> getRunClasspath(Compilation compilation) throws IOException {
+    final List<File> result = new ArrayList<>(super.getRunClasspath(compilation));
+    result.add(findJarInBuild("lammy-just-json-serialization"));
+    result.add(findJarInLocalMavenRepository("com.sigpwned", "just-json", JUST_JSON_VERSION));
+    return unmodifiableList(result);
   }
 }

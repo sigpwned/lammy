@@ -26,41 +26,51 @@ import java.util.ArrayList;
 import java.util.List;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import com.google.testing.compile.Compilation;
-import com.sigpwned.lammy.test.ResponseFilterTestBase;
+import com.sigpwned.lammy.test.RequestFilterTestBase;
 
 @Testcontainers
-public class StreamedBeanLambdaProcessorResponseFilterTest extends ResponseFilterTestBase {
+public class StreamedBeanLambdaConsumerRequestFilterIT extends RequestFilterTestBase {
   static {
     // Enable this when needed for debugging
     // localstack.followOutput(new Slf4jLogConsumer(LOGGER));
   }
 
+  public static final String GREETING_PROCESSOR_REQUEST_TYPE = "Map<String, Object>";
+
+  @Override
+  public String greetingProcessorRequest(String name) {
+    return "{\"name\":\"" + name + "\"}";
+  }
+
   @Override
   public String greetingProcessorSource(Boolean autoloadAll, Boolean autoloadRequestFilters,
       Boolean autoloadResponseFilters, Boolean autoloadExceptionMappers) {
+    if (autoloadResponseFilters != null)
+      throw new IllegalArgumentException("autoloadResponseFilters is not supported");
+    if (autoloadExceptionMappers != null)
+      throw new IllegalArgumentException("autoloadExceptionMappers is not supported");
+
     // @formatter:off
     return ""
       + "package com.example;\n"
       + "\n"
       + "import com.amazonaws.services.lambda.runtime.Context;\n"
       + "import com.amazonaws.services.lambda.runtime.RequestHandler;\n"
-      + "import com.sigpwned.lammy.core.base.streamedbean.StreamedBeanLambdaProcessorBase;\n"
-      + "import com.sigpwned.lammy.core.base.streamedbean.StreamedBeanLambdaProcessorConfiguration;\n"
+      + "import com.sigpwned.lammy.core.base.streamedbean.StreamedBeanLambdaConsumerBase;\n"
+      + "import com.sigpwned.lammy.core.base.streamedbean.StreamedBeanLambdaConsumerConfiguration;\n"
       + "import java.util.List;\n"
       + "import java.util.Map;\n"
       + "\n"
-      + "public class LambdaFunction extends StreamedBeanLambdaProcessorBase<" + GREETING_PROCESSOR_REQUEST_TYPE + ", " + GREETING_PROCESSOR_RESPONSE_TYPE + "> {\n"
+      + "public class LambdaFunction extends StreamedBeanLambdaConsumerBase<" + GREETING_PROCESSOR_REQUEST_TYPE + "> {\n"
       + "  public LambdaFunction() {\n"
-      + "    super(new StreamedBeanLambdaProcessorConfiguration()\n"
-      + "      .withAutoloadRequestFilters(" + autoloadRequestFilters + ")\n"
-      + "      .withAutoloadResponseFilters(" + autoloadResponseFilters + ")\n"
-      + "      .withAutoloadExceptionMappers(" + autoloadExceptionMappers + "));\n"
+      + "    super(new StreamedBeanLambdaConsumerConfiguration()\n"
+      + "      .withAutoloadRequestFilters(" + autoloadRequestFilters + "));\n"
       + "  }\n"
       + "\n"
       + "  @Override\n"
-      + "  public " + GREETING_PROCESSOR_RESPONSE_TYPE +  " handleStreamedBeanRequest(" + GREETING_PROCESSOR_REQUEST_TYPE + " input, Context context) {\n"
+      + "  public void consumeStreamedBeanRequest(" + GREETING_PROCESSOR_REQUEST_TYPE + " input, Context context) {\n"
       + "    String name = input.get(\"name\") != null ? input.get(\"name\").toString() : \"world\";\n"
-      + "    return \"Hello, \" + name + \"!\";\n"
+      + "    System.out.println(\"Hello, \" + name + \"!\");\n"
       + "  }\n"
       + "\n"
       + "  @Override\n"
@@ -81,5 +91,10 @@ public class StreamedBeanLambdaProcessorResponseFilterTest extends ResponseFilte
     result.add(findJarInBuild("lammy-just-json-serialization"));
     result.add(findJarInLocalMavenRepository("com.sigpwned", "just-json", JUST_JSON_VERSION));
     return unmodifiableList(result);
+  }
+
+  @Override
+  protected String getExpectedResponseForName(String name) {
+    return "";
   }
 }

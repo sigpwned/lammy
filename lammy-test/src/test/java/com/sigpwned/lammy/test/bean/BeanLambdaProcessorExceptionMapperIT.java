@@ -20,17 +20,17 @@
 package com.sigpwned.lammy.test.bean;
 
 import org.testcontainers.junit.jupiter.Testcontainers;
-import com.sigpwned.lammy.test.BeanSmokeTestBase;
+import com.sigpwned.lammy.test.ExceptionMapperTestBase;
 
 @Testcontainers
-public class BeanLambdaProcessorSmokeTest extends BeanSmokeTestBase {
+public class BeanLambdaProcessorExceptionMapperIT extends ExceptionMapperTestBase {
   static {
     // Enable this when needed for debugging
     // localstack.followOutput(new Slf4jLogConsumer(LOGGER));
   }
 
   @Override
-  public String greetingProcessorSource(Boolean autoloadAll, Boolean autoloadRequestFilters,
+  public String throwingProcessorSource(Boolean autoloadAll, Boolean autoloadRequestFilters,
       Boolean autoloadResponseFilters, Boolean autoloadExceptionMappers) {
     // @formatter:off
     return ""
@@ -43,7 +43,7 @@ public class BeanLambdaProcessorSmokeTest extends BeanSmokeTestBase {
       + "import java.util.List;\n"
       + "import java.util.Map;\n"
       + "\n"
-      + "public class LambdaFunction extends BeanLambdaProcessorBase<" + GREETING_PROCESSOR_REQUEST_TYPE + ", " + GREETING_PROCESSOR_RESPONSE_TYPE + "> {\n"
+      + "public class LambdaFunction extends BeanLambdaProcessorBase<" + THROWING_PROCESSOR_REQUEST_TYPE + ", " + THROWING_PROCESSOR_RESPONSE_TYPE + "> {\n"
       + "  public LambdaFunction() {\n"
       + "    super(new BeanLambdaProcessorConfiguration()\n"
       + "      .withAutoloadRequestFilters(" + autoloadRequestFilters + ")\n"
@@ -52,9 +52,9 @@ public class BeanLambdaProcessorSmokeTest extends BeanSmokeTestBase {
       + "  }\n"
       + "\n"
       + "  @Override\n"
-      + "  public " + GREETING_PROCESSOR_RESPONSE_TYPE +  " handleBeanRequest(" + GREETING_PROCESSOR_REQUEST_TYPE + " input, Context context) {\n"
+      + "  public " + THROWING_PROCESSOR_RESPONSE_TYPE +  " handleBeanRequest(" + THROWING_PROCESSOR_REQUEST_TYPE + " input, Context context) {\n"
       + "    String name = input.get(\"name\") != null ? input.get(\"name\").toString() : \"world\";\n"
-      + "    return \"Hello, \" + name + \"!\";\n"
+      + "    throw new IllegalArgumentException(name);\n"
       + "  }\n"
       + "\n"
       + "  @Override\n"

@@ -1,3 +1,22 @@
+/*-
+ * =================================LICENSE_START==================================
+ * lammy-core
+ * ====================================SECTION=====================================
+ * Copyright (C) 2023 - 2025 Andy Boothe
+ * ====================================SECTION=====================================
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ==================================LICENSE_END===================================
+ */
 package com.sigpwned.lammy.test.streamedbean;
 
 import static java.util.Collections.unmodifiableList;
@@ -7,48 +26,34 @@ import java.util.ArrayList;
 import java.util.List;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import com.google.testing.compile.Compilation;
-import com.sigpwned.lammy.test.InputInterceptorTestBase;
-import com.sigpwned.lammy.test.StreamFunctionTesting;
+import com.sigpwned.lammy.test.ResponseFilterTestBase;
 
 @Testcontainers
-public class StreamedBeanLambdaProcessorInputInterceptorTest extends InputInterceptorTestBase
-    implements StreamFunctionTesting {
+public class StreamedBeanLambdaProcessorResponseFilterIT extends ResponseFilterTestBase {
   static {
     // Enable this when needed for debugging
     // localstack.followOutput(new Slf4jLogConsumer(LOGGER));
   }
 
-  public static final String GREETING_PROCESSOR_REQUEST_TYPE = "Map<String, Object>";
-
-  public static final String GREETING_PROCESSOR_RESPONSE_TYPE = "String";
-
   @Override
-  public String greetingProcessorRequest(String name) {
-    return "{\"name\":\"" + name + "\"}";
-  }
-
-  @Override
-  public String greetingProcessorResponse(String name) {
-    return "\"Hello, " + name + "!\"";
-  }
-
-  @Override
-  public String greetingProcessorSource(Boolean autoloadAll, Boolean autoloadInputInterceptors,
-      Boolean autoloadOutputInterceptors, Boolean autoloadExceptionMappers) {
+  public String greetingProcessorSource(Boolean autoloadAll, Boolean autoloadRequestFilters,
+      Boolean autoloadResponseFilters, Boolean autoloadExceptionMappers) {
     // @formatter:off
     return ""
-      + "package " + PACKAGE_NAME + ";\n"
+      + "package com.example;\n"
       + "\n"
       + "import com.amazonaws.services.lambda.runtime.Context;\n"
+      + "import com.amazonaws.services.lambda.runtime.RequestHandler;\n"
       + "import com.sigpwned.lammy.core.base.streamedbean.StreamedBeanLambdaProcessorBase;\n"
       + "import com.sigpwned.lammy.core.base.streamedbean.StreamedBeanLambdaProcessorConfiguration;\n"
+      + "import java.util.List;\n"
       + "import java.util.Map;\n"
       + "\n"
       + "public class LambdaFunction extends StreamedBeanLambdaProcessorBase<" + GREETING_PROCESSOR_REQUEST_TYPE + ", " + GREETING_PROCESSOR_RESPONSE_TYPE + "> {\n"
       + "  public LambdaFunction() {\n"
       + "    super(new StreamedBeanLambdaProcessorConfiguration()\n"
-      + "      .withAutoloadInputInterceptors(" + autoloadInputInterceptors + ")\n"
-      + "      .withAutoloadOutputInterceptors(" + autoloadOutputInterceptors + ")\n"
+      + "      .withAutoloadRequestFilters(" + autoloadRequestFilters + ")\n"
+      + "      .withAutoloadResponseFilters(" + autoloadResponseFilters + ")\n"
       + "      .withAutoloadExceptionMappers(" + autoloadExceptionMappers + "));\n"
       + "  }\n"
       + "\n"

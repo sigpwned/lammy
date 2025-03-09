@@ -17,60 +17,44 @@
  * limitations under the License.
  * ==================================LICENSE_END===================================
  */
-package com.sigpwned.lammy.test.streamedbean;
+package com.sigpwned.lammy.test.bean;
 
-import static java.util.Collections.unmodifiableList;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import com.google.testing.compile.Compilation;
 import com.sigpwned.lammy.test.RequestFilterTestBase;
 
 @Testcontainers
-public class StreamedBeanLambdaConsumerRequestFilterTest extends RequestFilterTestBase {
+public class BeanLambdaProcessorRequestFilterIT extends RequestFilterTestBase {
   static {
     // Enable this when needed for debugging
     // localstack.followOutput(new Slf4jLogConsumer(LOGGER));
   }
 
-  public static final String GREETING_PROCESSOR_REQUEST_TYPE = "Map<String, Object>";
-
-  @Override
-  public String greetingProcessorRequest(String name) {
-    return "{\"name\":\"" + name + "\"}";
-  }
-
   @Override
   public String greetingProcessorSource(Boolean autoloadAll, Boolean autoloadRequestFilters,
       Boolean autoloadResponseFilters, Boolean autoloadExceptionMappers) {
-    if (autoloadResponseFilters != null)
-      throw new IllegalArgumentException("autoloadResponseFilters is not supported");
-    if (autoloadExceptionMappers != null)
-      throw new IllegalArgumentException("autoloadExceptionMappers is not supported");
-
     // @formatter:off
     return ""
       + "package com.example;\n"
       + "\n"
       + "import com.amazonaws.services.lambda.runtime.Context;\n"
       + "import com.amazonaws.services.lambda.runtime.RequestHandler;\n"
-      + "import com.sigpwned.lammy.core.base.streamedbean.StreamedBeanLambdaConsumerBase;\n"
-      + "import com.sigpwned.lammy.core.base.streamedbean.StreamedBeanLambdaConsumerConfiguration;\n"
+      + "import com.sigpwned.lammy.core.base.bean.BeanLambdaProcessorBase;\n"
+      + "import com.sigpwned.lammy.core.base.bean.BeanLambdaProcessorConfiguration;\n"
       + "import java.util.List;\n"
       + "import java.util.Map;\n"
       + "\n"
-      + "public class LambdaFunction extends StreamedBeanLambdaConsumerBase<" + GREETING_PROCESSOR_REQUEST_TYPE + "> {\n"
+      + "public class LambdaFunction extends BeanLambdaProcessorBase<" + GREETING_PROCESSOR_REQUEST_TYPE + ", " + GREETING_PROCESSOR_RESPONSE_TYPE + "> {\n"
       + "  public LambdaFunction() {\n"
-      + "    super(new StreamedBeanLambdaConsumerConfiguration()\n"
-      + "      .withAutoloadRequestFilters(" + autoloadRequestFilters + "));\n"
+      + "    super(new BeanLambdaProcessorConfiguration()\n"
+      + "      .withAutoloadRequestFilters(" + autoloadRequestFilters + ")\n"
+      + "      .withAutoloadResponseFilters(" + autoloadResponseFilters + ")\n"
+      + "      .withAutoloadExceptionMappers(" + autoloadExceptionMappers + "));\n"
       + "  }\n"
       + "\n"
       + "  @Override\n"
-      + "  public void consumeStreamedBeanRequest(" + GREETING_PROCESSOR_REQUEST_TYPE + " input, Context context) {\n"
+      + "  public " + GREETING_PROCESSOR_RESPONSE_TYPE +  " handleBeanRequest(" + GREETING_PROCESSOR_REQUEST_TYPE + " input, Context context) {\n"
       + "    String name = input.get(\"name\") != null ? input.get(\"name\").toString() : \"world\";\n"
-      + "    System.out.println(\"Hello, \" + name + \"!\");\n"
+      + "    return \"Hello, \" + name + \"!\";\n"
       + "  }\n"
       + "\n"
       + "  @Override\n"
@@ -79,22 +63,5 @@ public class StreamedBeanLambdaConsumerRequestFilterTest extends RequestFilterTe
       + "  }\n"
       + "}\n";
     // @formatter:on
-  }
-
-  /**
-   * We don't seem to have access to the runtime client when running in LocalStack, so we can't use
-   * the default serializer. Use Just JSON for testing.
-   */
-  @Override
-  protected List<File> getRunClasspath(Compilation compilation) throws IOException {
-    final List<File> result = new ArrayList<>(super.getRunClasspath(compilation));
-    result.add(findJarInBuild("lammy-just-json-serialization"));
-    result.add(findJarInLocalMavenRepository("com.sigpwned", "just-json", JUST_JSON_VERSION));
-    return unmodifiableList(result);
-  }
-
-  @Override
-  protected String getExpectedResponseForName(String name) {
-    return "";
   }
 }

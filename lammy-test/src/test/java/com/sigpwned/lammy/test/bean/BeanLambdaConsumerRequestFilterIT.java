@@ -23,7 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.sigpwned.lammy.test.RequestFilterTestBase;
 
 @Testcontainers
-public class BeanLambdaConsumerRequestFilterTest extends RequestFilterTestBase {
+public class BeanLambdaConsumerRequestFilterIT extends RequestFilterTestBase {
   static {
     // Enable this when needed for debugging
     // localstack.followOutput(new Slf4jLogConsumer(LOGGER));

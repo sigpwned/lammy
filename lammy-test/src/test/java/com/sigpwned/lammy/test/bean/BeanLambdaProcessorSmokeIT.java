@@ -20,10 +20,10 @@
 package com.sigpwned.lammy.test.bean;
 
 import org.testcontainers.junit.jupiter.Testcontainers;
-import com.sigpwned.lammy.test.ResponseFilterTestBase;
+import com.sigpwned.lammy.test.BeanSmokeTestBase;
 
 @Testcontainers
-public class BeanLambdaProcessorResponseFilterTest extends ResponseFilterTestBase {
+public class BeanLambdaProcessorSmokeIT extends BeanSmokeTestBase {
   static {
     // Enable this when needed for debugging
     // localstack.followOutput(new Slf4jLogConsumer(LOGGER));

@@ -37,7 +37,7 @@ import com.sigpwned.lammy.test.LammyTestBase;
 import com.sigpwned.lammy.test.StreamFunctionTesting;
 
 @Testcontainers
-public class StreamedBeanLambdaProcessorFullSmokeTest extends LammyTestBase
+public class StreamedBeanLambdaProcessorFullSmokeIT extends LammyTestBase
     implements StreamFunctionTesting, BeanFunctionTesting {
   static {
     // Enable this when needed for debugging

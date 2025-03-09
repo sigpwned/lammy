@@ -23,7 +23,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import com.sigpwned.lammy.test.StreamSmokeTestBase;
 
 @Testcontainers
-public class StreamLambdaProcessorSmokeTest extends StreamSmokeTestBase {
+public class StreamLambdaProcessorSmokeIT extends StreamSmokeTestBase {
   static {
     // Enable this when needed for debugging
     // localstack.followOutput(new Slf4jLogConsumer(LOGGER));

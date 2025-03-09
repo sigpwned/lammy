@@ -29,7 +29,7 @@ import com.google.testing.compile.Compilation;
 import com.sigpwned.lammy.test.RequestFilterTestBase;
 
 @Testcontainers
-public class StreamedBeanLambdaProcessorRequestFilterTest extends RequestFilterTestBase {
+public class StreamedBeanLambdaProcessorRequestFilterIT extends RequestFilterTestBase {
   static {
     // Enable this when needed for debugging
     // localstack.followOutput(new Slf4jLogConsumer(LOGGER));
