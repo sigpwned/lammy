@@ -70,7 +70,8 @@ public abstract class LammyTestBase {
           .withServices(LocalStackContainer.Service.LAMBDA);
 
   public Compilation doCompile(JavaFileObject... source) throws IOException {
-    return Compiler.javac().withClasspath(getCompileClasspath()).compile(source);
+    return Compiler.javac().withClasspath(getCompileClasspath()).withOptions("--release", "8")
+        .compile(source);
   }
 
   /**

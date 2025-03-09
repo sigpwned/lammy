@@ -21,6 +21,8 @@
         <jackson.version>2.18.3</jackson.version>
         <gson.version>2.12.1</gson.version>
         <just-json.version>0.0.1</just-json.version>
+        <hibernate.version>8.0.2.Final</hibernate.version>
+        <expressly.version>5.0.0</expressly.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -54,6 +56,16 @@
                 <groupId>com.sigpwned</groupId>
                 <artifactId>just-json</artifactId>
                 <version>${just-json.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate.validator</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.expressly</groupId>
+                <artifactId>expressly</artifactId>
+                <version>${expressly.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
