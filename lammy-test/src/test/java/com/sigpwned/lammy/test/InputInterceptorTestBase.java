@@ -100,7 +100,7 @@ public abstract class InputInterceptorTestBase extends LammyTestBase
     final String output = buildAndInvokeGreetingProcessorWithTwoInputInterceptors(nonce,
         autoloadAll, autoloadInputInterceptors, "A", "B", name);
 
-    assertThat(output).isEqualTo(greetingProcessorResponse(name));
+    assertThat(output).isEqualTo(getExpectedResponseForName(name));
 
     final int requestFilterAIndex =
         localstack.getLogs().indexOf(inputInterceptorInterceptMessage(nonce, "A"));
@@ -126,7 +126,7 @@ public abstract class InputInterceptorTestBase extends LammyTestBase
     final String output = buildAndInvokeGreetingProcessorWithTwoInputInterceptors(nonce,
         autoloadAll, autoloadInputInterceptors, "A", "B", name);
 
-    assertThat(output).isEqualTo(greetingProcessorResponse(name));
+    assertThat(output).isEqualTo(getExpectedResponseForName(name));
 
     final int requestFilterAIndex =
         localstack.getLogs().indexOf(inputInterceptorInterceptMessage(nonce, "A"));
@@ -152,7 +152,7 @@ public abstract class InputInterceptorTestBase extends LammyTestBase
     final String output = buildAndInvokeGreetingProcessorWithTwoInputInterceptors(nonce,
         autoloadAll, autoloadInputInterceptors, "B", "A", name);
 
-    assertThat(output).isEqualTo(greetingProcessorResponse(name));
+    assertThat(output).isEqualTo(getExpectedResponseForName(name));
 
     final int requestFilterBIndex =
         localstack.getLogs().indexOf(inputInterceptorInterceptMessage(nonce, "B"));
@@ -178,7 +178,7 @@ public abstract class InputInterceptorTestBase extends LammyTestBase
     final String output = buildAndInvokeGreetingProcessorWithTwoInputInterceptors(nonce,
         autoloadAll, autoloadInputInterceptors, "B", "A", name);
 
-    assertThat(output).isEqualTo(greetingProcessorResponse(name));
+    assertThat(output).isEqualTo(getExpectedResponseForName(name));
 
     final int requestFilterBIndex =
         localstack.getLogs().indexOf(inputInterceptorInterceptMessage(nonce, "B"));
@@ -204,7 +204,7 @@ public abstract class InputInterceptorTestBase extends LammyTestBase
     final String output = buildAndInvokeGreetingProcessorWithTwoInputInterceptors(nonce,
         autoloadAll, autoloadInputInterceptors, "A", "B", name);
 
-    assertThat(output).isEqualTo(greetingProcessorResponse(name));
+    assertThat(output).isEqualTo(getExpectedResponseForName(name));
 
     final int requestFilterAIndex =
         localstack.getLogs().indexOf(inputInterceptorInterceptMessage(nonce, "A"));
@@ -228,7 +228,7 @@ public abstract class InputInterceptorTestBase extends LammyTestBase
     final String output = buildAndInvokeGreetingProcessorWithTwoInputInterceptors(nonce,
         autoloadAll, autoloadInputInterceptors, "A", "B", name);
 
-    assertThat(output).isEqualTo(greetingProcessorResponse(name));
+    assertThat(output).isEqualTo(getExpectedResponseForName(name));
 
     final int requestFilterAIndex =
         localstack.getLogs().indexOf(inputInterceptorInterceptMessage(nonce, "A"));
@@ -252,7 +252,7 @@ public abstract class InputInterceptorTestBase extends LammyTestBase
     final String output = buildAndInvokeGreetingProcessorWithTwoInputInterceptors(nonce,
         autoloadAll, autoloadInputInterceptors, "A", "B", name);
 
-    assertThat(output).isEqualTo(greetingProcessorResponse(name));
+    assertThat(output).isEqualTo(getExpectedResponseForName(name));
 
     final int requestFilterAIndex =
         localstack.getLogs().indexOf(inputInterceptorInterceptMessage(nonce, "A"));
@@ -261,5 +261,9 @@ public abstract class InputInterceptorTestBase extends LammyTestBase
     final int requestFilterBIndex =
         localstack.getLogs().indexOf(inputInterceptorInterceptMessage(nonce, "B"));
     assertThat(requestFilterBIndex).isEqualTo(-1);
+  }
+
+  protected String getExpectedResponseForName(String name) {
+    return greetingProcessorResponse(name);
   }
 }

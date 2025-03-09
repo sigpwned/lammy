@@ -103,7 +103,7 @@ public abstract class RequestFilterTestBase extends LammyTestBase implements Bea
     final String output = buildAndInvokeGreetingProcessorWithTwoRequestFilters(nonce, autoloadAll,
         autoloadRequestFilters, "A", "B", name);
 
-    assertThat(output).isEqualTo(greetingProcessorResponse(name));
+    assertThat(output).isEqualTo(getExpectedResponseForName(name));
 
     final int requestFilterAIndex =
         localstack.getLogs().indexOf(requestFilterFilterMessage(nonce, "A"));
@@ -129,7 +129,7 @@ public abstract class RequestFilterTestBase extends LammyTestBase implements Bea
     final String output = buildAndInvokeGreetingProcessorWithTwoRequestFilters(nonce, autoloadAll,
         autoloadRequestFilters, "A", "B", name);
 
-    assertThat(output).isEqualTo(greetingProcessorResponse(name));
+    assertThat(output).isEqualTo(getExpectedResponseForName(name));
 
     final int requestFilterAIndex =
         localstack.getLogs().indexOf(requestFilterFilterMessage(nonce, "A"));
@@ -155,7 +155,7 @@ public abstract class RequestFilterTestBase extends LammyTestBase implements Bea
     final String output = buildAndInvokeGreetingProcessorWithTwoRequestFilters(nonce, autoloadAll,
         autoloadRequestFilters, "B", "A", name);
 
-    assertThat(output).isEqualTo(greetingProcessorResponse(name));
+    assertThat(output).isEqualTo(getExpectedResponseForName(name));
 
     final int requestFilterBIndex =
         localstack.getLogs().indexOf(requestFilterFilterMessage(nonce, "B"));
@@ -181,7 +181,7 @@ public abstract class RequestFilterTestBase extends LammyTestBase implements Bea
     final String output = buildAndInvokeGreetingProcessorWithTwoRequestFilters(nonce, autoloadAll,
         autoloadRequestFilters, "B", "A", name);
 
-    assertThat(output).isEqualTo(greetingProcessorResponse(name));
+    assertThat(output).isEqualTo(getExpectedResponseForName(name));
 
     final int requestFilterBIndex =
         localstack.getLogs().indexOf(requestFilterFilterMessage(nonce, "B"));
@@ -206,7 +206,7 @@ public abstract class RequestFilterTestBase extends LammyTestBase implements Bea
     final String output = buildAndInvokeGreetingProcessorWithTwoRequestFilters(nonce, autoloadAll,
         autoloadRequestFilters, "A", "B", name);
 
-    assertThat(output).isEqualTo(greetingProcessorResponse(name));
+    assertThat(output).isEqualTo(getExpectedResponseForName(name));
 
     final int requestFilterAIndex =
         localstack.getLogs().indexOf(requestFilterFilterMessage(nonce, "A"));
@@ -230,7 +230,7 @@ public abstract class RequestFilterTestBase extends LammyTestBase implements Bea
     final String output = buildAndInvokeGreetingProcessorWithTwoRequestFilters(nonce, autoloadAll,
         autoloadRequestFilters, "A", "B", name);
 
-    assertThat(output).isEqualTo(greetingProcessorResponse(name));
+    assertThat(output).isEqualTo(getExpectedResponseForName(name));
 
     final int requestFilterAIndex =
         localstack.getLogs().indexOf(requestFilterFilterMessage(nonce, "A"));
@@ -254,7 +254,7 @@ public abstract class RequestFilterTestBase extends LammyTestBase implements Bea
     final String output = buildAndInvokeGreetingProcessorWithTwoRequestFilters(nonce, autoloadAll,
         autoloadRequestFilters, "A", "B", name);
 
-    assertThat(output).isEqualTo(greetingProcessorResponse(name));
+    assertThat(output).isEqualTo(getExpectedResponseForName(name));
 
     final int requestFilterAIndex =
         localstack.getLogs().indexOf(requestFilterFilterMessage(nonce, "A"));
@@ -263,5 +263,9 @@ public abstract class RequestFilterTestBase extends LammyTestBase implements Bea
     final int requestFilterBIndex =
         localstack.getLogs().indexOf(requestFilterFilterMessage(nonce, "B"));
     assertThat(requestFilterBIndex).isEqualTo(-1);
+  }
+
+  protected String getExpectedResponseForName(String name) {
+    return greetingProcessorResponse(name);
   }
 }
