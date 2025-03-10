@@ -14,13 +14,13 @@
     <inceptionYear>2023</inceptionYear>
     <organization>
         <name>Andy Boothe</name>
-        <url>https://www.sigpwned.com/</url>
+        <url>https://www.aleph0.io/</url>
     </organization>
     
     <scm>
-        <connection>scm:git:ssh://git@github.com/sigpwned/lammy.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/sigpwned/lammy.git</developerConnection>
-        <url>https://github.com/sigpwned/lammy/tree/main</url>
+        <connection>scm:git:ssh://git@github.com/aleph0io/lammy.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/aleph0io/lammy.git</developerConnection>
+        <url>https://github.com/aleph0io/lammy/tree/main</url>
         <tag>HEAD</tag>
     </scm>
     <licenses>
@@ -52,7 +52,7 @@
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/sigpwned/emoji4j</url>
+        <url>https://github.com/aleph0io/lammy</url>
     </issueManagement>
 
     <build>
