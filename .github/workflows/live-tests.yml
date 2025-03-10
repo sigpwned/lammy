@@ -15,7 +15,6 @@ on:
 
 env:
   FUNCTION_NAME: "ephemeral-lambda-${GITHUB_SHA::7}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-  AWS_REGION: "${{ vars.AWS_REGION }}"
 
 jobs:
   build:
@@ -47,8 +46,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: "arn:aws:iam::${{ vars.CI_AWS_ACCOUNT_ID }}:role/github-oidc-aleph0io-role"
-          aws-region: "$AWS_REGION"
+          role-to-assume: "arn:aws:iam::${{ vars.CI_AWS_ACCOUNT_ID }}:role/lammy-ci-role"
+          aws-region: "${{ vars.AWS_REGION }}"
 
       # ----- Create Ephemeral Lambda Function -----
       - name: Create ephemeral Lambda function
@@ -58,7 +57,7 @@ jobs:
             --zip-file "file://lammy-example-lambda-function/target/lammy-example-lambda-function.jar" \
             --handler "io.aleph0.lammy.example.lambdafunction.stream.ExampleStreamLambdaProcessor::handleRequest" \
             --runtime "java8" \
-            --role "arn:aws:iam::${{ vars.CI_AWS_ACCOUNT_ID }}:role/lammy-ci-role"
+            --role "arn:aws:iam::${{ vars.CI_AWS_ACCOUNT_ID }}:role/lammy-lambda-execution-role"
 
       # ----- Invoke the Ephemeral Lambda Function -----
       - name: Invoke ephemeral Lambda function
