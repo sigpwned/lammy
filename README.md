@@ -1,4 +1,4 @@
-# lammy
+# lammy [![Live Tests](https://github.com/aleph0io/lammy/actions/workflows/live-tests.yml/badge.svg)](https://github.com/aleph0io/lammy/actions/workflows/live-tests.yml)
 
 Lammy is a microframework for building AWS Lambda functions in Java 8+.
 
