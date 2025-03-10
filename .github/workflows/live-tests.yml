@@ -71,10 +71,11 @@ jobs:
         run: |
           aws lambda invoke \
             --function-name "$FUNCTION_NAME" \
-            --payload "ECHO" \
+            --cli-binary-format raw-in-base64-out \
+            --payload '{"hello":"world"}' \
             response.out
           RESPONSE=$(cat response.out)
-          if [ "$RESPONSE" != "ECHO" ]
+          if [ "$RESPONSE" != '{"hello":"world"}' ]
           then
             echo "Unexpected response: $RESPONSE"
             exit 1
