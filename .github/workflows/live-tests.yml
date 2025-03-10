@@ -13,6 +13,10 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  id-token: write # This is required for requesting the JWT
+  contents: read  # This is required for actions/checkout
+
 env:
   FUNCTION_NAME: "ephemeral-lambda-${GITHUB_SHA::7}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
