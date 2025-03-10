@@ -34,10 +34,10 @@ Resources:
               Federated: !GetAtt GitHubOidcProvider.Arn
             Action: sts:AssumeRoleWithWebIdentity
             Condition:
-              # Allow any repo; adjust the pattern as needed.
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
-                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrganization}/lammy"
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrganization}/lammy:*"
       Policies:
         - PolicyName: LambdaManagement
           PolicyDocument:

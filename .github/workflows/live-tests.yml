@@ -44,7 +44,7 @@ jobs:
 
       # ----- AWS OIDC Credentials -----
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: "arn:aws:iam::${{ vars.CI_AWS_ACCOUNT_ID }}:role/lammy-ci-role"
           aws-region: "${{ vars.AWS_REGION }}"
