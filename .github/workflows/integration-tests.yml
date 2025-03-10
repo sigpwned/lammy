@@ -1,4 +1,4 @@
-name: tests
+name: integration tests
 
 on:
   push:
@@ -31,12 +31,12 @@ jobs:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
-    - name: Build and analyze
+    - name: Build and Run Integration Tests
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
       run: |
-        mvn                                                    \
-        -B                                                     \
-        clean                                                  \
-        verify                                                 \
+        mvn             \
+        -B              \
+        clean           \
+        verify          \
         --file pom.xml
