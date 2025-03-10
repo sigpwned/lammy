@@ -54,7 +54,7 @@ jobs:
       - name: Create ephemeral Lambda function
         run: |
           # Compute our function name here using Bash substitution rules on GITHUB_SHA
-          FUNCTION_NAME="ephemeral-lambda-${GITHUB_SHA::7}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          FUNCTION_NAME="lammy-ci-${GITHUB_SHA::7}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           aws lambda create-function \
             --function-name "$FUNCTION_NAME" \
             --zip-file "fileb://lammy-example-lambda-function/target/lammy-example-lambda-function.jar" \
