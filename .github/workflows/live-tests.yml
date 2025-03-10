@@ -59,7 +59,7 @@ jobs:
             --function-name "$FUNCTION_NAME" \
             --zip-file "fileb://lammy-example-lambda-function/target/lammy-example-lambda-function.jar" \
             --handler "io.aleph0.lammy.example.lambdafunction.stream.ExampleStreamLambdaProcessor::handleRequest" \
-            --runtime "java8" \
+            --runtime "java8.al2" \
             --role "arn:aws:iam::${{ vars.CI_AWS_ACCOUNT_ID }}:role/lammy-lambda-execution-role"
           # Export the function name for later steps
           echo "FUNCTION_NAME=$FUNCTION_NAME" >> $GITHUB_ENV
