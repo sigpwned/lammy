@@ -49,6 +49,10 @@ Resources:
                   - lambda:InvokeFunction
                   - lambda:DeleteFunction
                 Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:lammy-ci-*"
+              # Permission to pass the Lambda execution role to the Lambda service
+              - Effect: Allow
+                Action: iam:PassRole
+                Resource: !GetAtt LammyLambdaExecutionRole.Arn
 
   LammyLambdaExecutionRole:
     Type: AWS::IAM::Role
