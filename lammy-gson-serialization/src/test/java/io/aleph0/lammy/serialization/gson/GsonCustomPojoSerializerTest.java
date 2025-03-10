@@ -1,6 +1,7 @@
 package io.aleph0.lammy.serialization.gson;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
@@ -55,5 +56,11 @@ public class GsonCustomPojoSerializerTest {
     final String result = new String(output.toByteArray(), StandardCharsets.UTF_8);
 
     assertThat(result).isEqualTo("{\"key\":\"value\"}");
+  }
+
+  @Test
+  public void givenNullGson_whenCallSetGson_thenThrowNullPointerException() {
+    assertThatThrownBy(() -> GsonCustomPojoSerializer.setGson(null))
+        .isInstanceOf(NullPointerException.class);
   }
 }

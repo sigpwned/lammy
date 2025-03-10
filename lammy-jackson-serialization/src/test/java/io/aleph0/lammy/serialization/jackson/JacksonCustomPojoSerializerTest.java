@@ -1,6 +1,7 @@
 package io.aleph0.lammy.serialization.jackson;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
@@ -55,5 +56,11 @@ public class JacksonCustomPojoSerializerTest {
     final String result = new String(output.toByteArray(), StandardCharsets.UTF_8);
 
     assertThat(result).isEqualTo("{\"key\":\"value\"}");
+  }
+
+  @Test
+  public void givenNullObjectMapper_whenCallSetMapper_thenThrowNullPointerException() {
+    assertThatThrownBy(() -> JacksonCustomPojoSerializer.setMapper(null))
+        .isInstanceOf(NullPointerException.class);
   }
 }
