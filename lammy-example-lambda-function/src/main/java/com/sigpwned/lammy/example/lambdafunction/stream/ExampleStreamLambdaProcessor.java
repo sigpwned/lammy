@@ -11,7 +11,9 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.ServiceLoader;
 import java.util.function.Function;
 import com.amazonaws.services.lambda.runtime.ClientContext;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -20,6 +22,7 @@ import com.sigpwned.lammy.core.model.stream.InputContext;
 import com.sigpwned.lammy.core.model.stream.InputInterceptor;
 import com.sigpwned.lammy.core.model.stream.OutputContext;
 import com.sigpwned.lammy.core.model.stream.OutputInterceptor;
+import com.sigpwned.lammy.core.serialization.PlatformCustomPojoSerializer;
 
 /**
  * Implements a simple Lambda function that reads various system files and prints their contents to
@@ -85,9 +88,16 @@ public class ExampleStreamLambdaProcessor extends StreamLambdaProcessorBase {
         .ofNullable(context.getClientContext()).map(ClientContext::getEnvironment).orElse(null));
     System.out.println();
 
-    final byte[] inputBytes = toByteArray(inputStream);
+    System.out.println("==== SERVICES ====");
+    try {
+      PlatformCustomPojoSerializer serializer = new PlatformCustomPojoSerializer();
+      System.out.println("PlatformCustomPojoSerializer: " + serializer);
+    } catch (Exception e) {
+      System.out.println("PlatformCustomPojoSerializer: " + null);
+      e.printStackTrace(System.out);
+    }
 
-    outputStream.write(inputBytes);
+    outputStream.write(toByteArray(inputStream));
   }
 
   public static void printFileContents(PrintStream out, File f) {
@@ -123,5 +133,12 @@ public class ExampleStreamLambdaProcessor extends StreamLambdaProcessorBase {
         out.write(buf, 0, nread);
       return out.toByteArray();
     }
+  }
+
+  public static <T> Optional<T> findFirstService(Class<T> serviceType) {
+    final Iterator<T> iterator = ServiceLoader.load(serviceType).iterator();
+    if (iterator.hasNext())
+      return Optional.ofNullable(iterator.next());
+    return Optional.empty();
   }
 }
