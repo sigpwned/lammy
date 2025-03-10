@@ -1,1 +1,1 @@
-com.sigpwned.lammy.serialization.jackson.JacksonCustomPojoSerializer
+io.aleph0.lammy.serialization.jackson.JacksonCustomPojoSerializer

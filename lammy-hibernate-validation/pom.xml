@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.sigpwned</groupId>
+        <groupId>io.aleph0</groupId>
         <artifactId>lammy-parent</artifactId>
         <version>0.0.0-b1-SNAPSHOT</version>
         <relativePath>../lammy-parent</relativePath>
@@ -36,7 +36,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.sigpwned</groupId>
+            <groupId>io.aleph0</groupId>
             <artifactId>lammy-core</artifactId>
         </dependency>
         <dependency>
