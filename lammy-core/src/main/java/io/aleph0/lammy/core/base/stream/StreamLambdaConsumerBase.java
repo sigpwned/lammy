@@ -30,6 +30,10 @@ import io.aleph0.lammy.core.model.stream.InputInterceptor;
 public abstract class StreamLambdaConsumerBase extends StreamLambdaBase {
   private boolean initialized;
 
+  public StreamLambdaConsumerBase() {
+    this(new StreamLambdaConsumerConfiguration());
+  }
+
   public StreamLambdaConsumerBase(StreamLambdaConsumerConfiguration configuration) {
     super(StreamLambdaConfiguration.fromConsumerConfiguration(configuration));
   }
@@ -52,7 +56,8 @@ public abstract class StreamLambdaConsumerBase extends StreamLambdaBase {
     }
   }
 
-  public abstract void consumeStreamingRequest(InputStream inputStream, Context context);
+  public abstract void consumeStreamingRequest(InputStream inputStream, Context context)
+      throws IOException;
 
   /**
    * Prepare the input stream for the lambda function using the registered request interceptors.

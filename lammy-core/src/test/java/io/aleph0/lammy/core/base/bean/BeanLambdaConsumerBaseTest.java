@@ -20,25 +20,22 @@
 package io.aleph0.lammy.core.base.bean;
 
 
-import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.google.common.collect.Lists;
-import io.aleph0.lammy.core.model.bean.ExceptionMapper;
 import io.aleph0.lammy.core.model.bean.RequestContext;
 import io.aleph0.lammy.core.model.bean.RequestFilter;
 import io.aleph0.lammy.core.model.bean.ResponseContext;
 import io.aleph0.lammy.core.model.bean.ResponseFilter;
 
-public class BeanLambdaProcessorBaseTest {
+public class BeanLambdaConsumerBaseTest {
+  public Map<String, Object> output;
+
   public static class TestRequestFilter implements RequestFilter<Map<String, Object>> {
     public final String id;
 
@@ -84,25 +81,20 @@ public class BeanLambdaProcessorBaseTest {
     }
   }
 
-  public static class FilterTestBeanLambdaProcessor
-      extends BeanLambdaProcessorBase<Map<String, Object>, Map<String, Object>> {
+  public class FilterTestBeanLambdaProcessor extends BeanLambdaConsumerBase<Map<String, Object>> {
     public FilterTestBeanLambdaProcessor() {
       registerRequestFilter(new TestRequestFilter("A"));
       registerRequestFilter(new TestRequestFilter("B"));
-      registerResponseFilter(new TestResponseFilter("X"));
-      registerResponseFilter(new TestResponseFilter("Y"));
     }
 
     @Override
-    public Map<String, Object> handleBeanRequest(Map<String, Object> input, Context context) {
+    public void consumeBeanRequest(Map<String, Object> input, Context context) {
       final String name = (String) input.get("name");
 
       final String greeting = "Hello, " + name + "!";
 
-      final Map<String, Object> output = new HashMap<>(input);
+      output = new HashMap<>(input);
       output.put("greeting", greeting);
-
-      return output;
     }
   }
 
@@ -113,75 +105,13 @@ public class BeanLambdaProcessorBaseTest {
     final Map<String, Object> input = new HashMap<>();
     input.put("name", "Gandalf");
 
-    final Map<String, Object> output = unit.handleRequest(input, null);
+    unit.handleRequest(input, null);
 
     final Map<String, Object> expected = new HashMap<>();
     expected.put("name", "Gandalf");
     expected.put("greeting", "Hello, Gandalf!");
     expected.put("requestFilters", Lists.newArrayList("A", "B"));
-    expected.put("responseFilters", Lists.newArrayList("X", "Y"));
 
     assertThat(output).isEqualTo(expected);
-  }
-
-  public static class TestExceptionMapper
-      implements ExceptionMapper<IllegalArgumentException, Map<String, Object>> {
-    @Override
-    public Map<String, Object> mapExceptionTo(IllegalArgumentException e, Type responseType,
-        Context context) {
-      final Map<String, Object> output = new HashMap<>();
-      output.put("error", e.getMessage());
-      return output;
-    }
-  }
-
-  public static class ExceptionTestBeanLambdaProcessor
-      extends BeanLambdaProcessorBase<Map<String, Object>, Map<String, Object>> {
-    private final Supplier<? extends RuntimeException> exceptionFactory;
-
-    public ExceptionTestBeanLambdaProcessor(Supplier<? extends RuntimeException> exceptionFactory) {
-      registerExceptionMapper(new TestExceptionMapper());
-      this.exceptionFactory = requireNonNull(exceptionFactory);
-    }
-
-    @Override
-    public Map<String, Object> handleBeanRequest(Map<String, Object> input, Context context) {
-      throw exceptionFactory.get();
-    }
-  }
-
-  @Test
-  public void givenProcessorWithExceptionMapper_whenThrowSubclassOfHandledExceptionType_thenExceptionMapped() {
-    // We use NumberFormatException here because it's a convenient child of IllegalArgumentException
-    final ExceptionTestBeanLambdaProcessor unit =
-        new ExceptionTestBeanLambdaProcessor(() -> new NumberFormatException("message"));
-
-    final Map<String, Object> output = unit.handleRequest(new HashMap<>(), null);
-
-    final Map<String, Object> expected = new HashMap<>();
-    expected.put("error", "message");
-
-    assertThat(output).isEqualTo(expected);
-  }
-
-  @Test
-  public void givenProcessorWithExceptionMapper_whenThrowExactHandledExceptionType_thenExceptionMapped() {
-    final ExceptionTestBeanLambdaProcessor unit =
-        new ExceptionTestBeanLambdaProcessor(() -> new IllegalArgumentException("message"));
-
-    final Map<String, Object> output = unit.handleRequest(new HashMap<>(), null);
-
-    final Map<String, Object> expected = new HashMap<>();
-    expected.put("error", "message");
-
-    assertThat(output).isEqualTo(expected);
-  }
-
-  @Test
-  public void givenProcessorWithExceptionMapper_whenThrowUnhandledExceptionType_thenExceptionMapped() {
-    final ExceptionTestBeanLambdaProcessor unit =
-        new ExceptionTestBeanLambdaProcessor(() -> new RuntimeException("message"));
-    assertThatThrownBy(() -> unit.handleRequest(new HashMap<>(), null))
-        .isExactlyInstanceOf(RuntimeException.class);
   }
 }
