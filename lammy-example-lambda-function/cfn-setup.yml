@@ -46,6 +46,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - lambda:CreateFunction
+                  - lambda:GetFunction
                   - lambda:InvokeFunction
                   - lambda:DeleteFunction
                 Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:lammy-ci-*"
