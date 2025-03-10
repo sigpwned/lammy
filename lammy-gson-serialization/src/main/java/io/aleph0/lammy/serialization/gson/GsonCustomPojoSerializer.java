@@ -52,7 +52,7 @@ public class GsonCustomPojoSerializer implements CustomPojoSerializer {
   @Override
   public <T> void toJson(T value, OutputStream out, Type type) {
     try (Writer output = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
-      getGson().toJson(type, output);
+      getGson().toJson(value, output);
     } catch (IOException e) {
       throw new UncheckedIOException("Failed to write output", e);
     }
