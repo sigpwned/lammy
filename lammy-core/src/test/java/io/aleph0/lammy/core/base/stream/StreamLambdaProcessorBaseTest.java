@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -32,55 +31,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 import com.amazonaws.services.lambda.runtime.Context;
+import io.aleph0.lammy.core.base.StreamTesting;
 import io.aleph0.lammy.core.io.BrokenOutputStream;
 import io.aleph0.lammy.core.io.NullInputStream;
-import io.aleph0.lammy.core.model.stream.ExceptionWriter;
-import io.aleph0.lammy.core.model.stream.InputContext;
-import io.aleph0.lammy.core.model.stream.InputInterceptor;
-import io.aleph0.lammy.core.model.stream.OutputContext;
-import io.aleph0.lammy.core.model.stream.OutputInterceptor;
 
-public class StreamLambdaProcessorBaseTest {
-  public static class TestInputInterceptor implements InputInterceptor {
-    public final String id;
-
-    public TestInputInterceptor(String id) {
-      this.id = id;
-    }
-
-    @Override
-    public void interceptRequest(InputContext requestContext, Context lambdaContext)
-        throws IOException {
-      final String originalInput =
-          StreamLambdaProcessorBaseTest.toString(requestContext.getInputStream());
-      final String updatedInput = originalInput + id;
-      requestContext
-          .setInputStream(new ByteArrayInputStream(updatedInput.getBytes(StandardCharsets.UTF_8)));
-    }
-  }
-
-  public static class TestOutputInterceptor implements OutputInterceptor {
-    public final String id;
-
-    public TestOutputInterceptor(String id) {
-      this.id = id;
-    }
-
-    @Override
-    public void interceptResponse(InputContext requestContext, OutputContext responseContext,
-        Context lambdaContext) throws IOException {
-      final OutputStream originalOutput = responseContext.getOutputStream();
-      final OutputStream decoratedOutput = new FilterOutputStream(originalOutput) {
-        @Override
-        public void close() throws IOException {
-          write(id.getBytes(StandardCharsets.UTF_8));
-          super.close();
-        }
-      };
-      responseContext.setOutputStream(decoratedOutput);
-    }
-  }
-
+public class StreamLambdaProcessorBaseTest implements StreamTesting {
   public static class InterceptorTestStreamLambdaProcessor extends StreamLambdaProcessorBase {
     public InterceptorTestStreamLambdaProcessor() {
       registerInputInterceptor(new TestInputInterceptor("A"));
@@ -112,15 +67,7 @@ public class StreamLambdaProcessorBaseTest {
       output = new String(out.toByteArray(), StandardCharsets.UTF_8);
     }
 
-    assertThat(output).isEqualTo("GandalfABKYX");
-  }
-
-  public static class TestExceptionWriter implements ExceptionWriter<IllegalArgumentException> {
-    @Override
-    public void writeExceptionTo(IllegalArgumentException e, OutputStream out, Context context)
-        throws IOException {
-      out.write(e.getMessage().getBytes(StandardCharsets.UTF_8));
-    }
+    assertThat(output).isEqualTo("GandalfBAKYX");
   }
 
   public static class ExceptionTestStreamLambdaProcessor extends StreamLambdaProcessorBase {

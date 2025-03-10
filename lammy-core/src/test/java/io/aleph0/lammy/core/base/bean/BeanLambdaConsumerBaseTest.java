@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,68 +21,18 @@ package io.aleph0.lammy.core.base.bean;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.google.common.collect.Lists;
-import io.aleph0.lammy.core.model.bean.RequestContext;
-import io.aleph0.lammy.core.model.bean.RequestFilter;
-import io.aleph0.lammy.core.model.bean.ResponseContext;
-import io.aleph0.lammy.core.model.bean.ResponseFilter;
+import io.aleph0.lammy.core.base.BeanTesting;
 
-public class BeanLambdaConsumerBaseTest {
+public class BeanLambdaConsumerBaseTest implements BeanTesting {
   public Map<String, Object> output;
 
-  public static class TestRequestFilter implements RequestFilter<Map<String, Object>> {
-    public final String id;
-
-    public TestRequestFilter(String id) {
-      this.id = id;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void filterRequest(RequestContext<Map<String, Object>> requestContext,
-        Context lambdaContext) {
-      final Map<String, Object> originalValue = requestContext.getInputValue();
-
-      final Map<String, Object> replacementValue = new HashMap<>(originalValue);
-      List<String> ids =
-          (List<String>) replacementValue.computeIfAbsent("requestFilters", k -> new ArrayList<>());
-      ids.add(id);
-
-      requestContext.setInputValue(replacementValue);
-    }
-  }
-
-  public static class TestResponseFilter
-      implements ResponseFilter<Map<String, Object>, Map<String, Object>> {
-    public final String id;
-
-    public TestResponseFilter(String id) {
-      this.id = id;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void filterResponse(RequestContext<Map<String, Object>> requestContext,
-        ResponseContext<Map<String, Object>> responseContext, Context lambdaContext) {
-      final Map<String, Object> originalValue = responseContext.getOutputValue();
-
-      final Map<String, Object> replacementValue = new HashMap<>(originalValue);
-      List<String> ids = (List<String>) replacementValue.computeIfAbsent("responseFilters",
-          k -> new ArrayList<>());
-      ids.add(id);
-
-      responseContext.setOutputValue(replacementValue);
-    }
-  }
-
-  public class FilterTestBeanLambdaProcessor extends BeanLambdaConsumerBase<Map<String, Object>> {
-    public FilterTestBeanLambdaProcessor() {
+  public class FilterTestBeanLambdaConsumer extends BeanLambdaConsumerBase<Map<String, Object>> {
+    public FilterTestBeanLambdaConsumer() {
       registerRequestFilter(new TestRequestFilter("A"));
       registerRequestFilter(new TestRequestFilter("B"));
     }
@@ -100,7 +50,7 @@ public class BeanLambdaConsumerBaseTest {
 
   @Test
   public void givenProcessorWithFilters_whenInvoke_thenFiltersRunAsExpected() {
-    final FilterTestBeanLambdaProcessor unit = new FilterTestBeanLambdaProcessor();
+    final FilterTestBeanLambdaConsumer unit = new FilterTestBeanLambdaConsumer();
 
     final Map<String, Object> input = new HashMap<>();
     input.put("name", "Gandalf");

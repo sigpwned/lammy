@@ -132,10 +132,11 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- We use Mockito 4.x for Java 8 support -->
             <dependency>
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-bom</artifactId>
-                <version>5.16.0</version>
+                <version>4.11.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>            
