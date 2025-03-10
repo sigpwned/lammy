@@ -1,4 +1,4 @@
-name: live tests
+name: Live Tests
 
 on:
   push:
