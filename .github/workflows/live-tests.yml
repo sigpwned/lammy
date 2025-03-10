@@ -64,10 +64,13 @@ jobs:
           # Export the function name for later steps
           echo "FUNCTION_NAME=$FUNCTION_NAME" >> $GITHUB_ENV
 
+      # ----- Wait for Lambda function to be updated/active -----
+      - name: Wait for Lambda function to be active
+        run: |
+          aws lambda wait function-active-v2 --function-name "$FUNCTION_NAME"
+
       # ----- Invoke the Ephemeral Lambda Function -----
       - name: Invoke ephemeral Lambda function
-        env:
-          FUNCTION_NAME: ${{ env.FUNCTION_NAME }}
         run: |
           aws lambda invoke \
             --function-name "$FUNCTION_NAME" \
@@ -84,7 +87,5 @@ jobs:
       # ----- Delete the Ephemeral Lambda Function (always runs) -----
       - name: Delete ephemeral Lambda function
         if: always()
-        env:
-          FUNCTION_NAME: ${{ env.FUNCTION_NAME }}
         run: |
           aws lambda delete-function --function-name "$FUNCTION_NAME"
