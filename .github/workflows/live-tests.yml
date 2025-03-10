@@ -17,9 +17,6 @@ permissions:
   id-token: write # This is required for requesting the JWT
   contents: read  # This is required for actions/checkout
 
-env:
-  FUNCTION_NAME: "ephemeral-lambda-${GITHUB_SHA::7}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -56,15 +53,21 @@ jobs:
       # ----- Create Ephemeral Lambda Function -----
       - name: Create ephemeral Lambda function
         run: |
+          # Compute our function name here using Bash substitution rules on GITHUB_SHA
+          FUNCTION_NAME="ephemeral-lambda-${GITHUB_SHA::7}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           aws lambda create-function \
             --function-name "$FUNCTION_NAME" \
             --zip-file "fileb://lammy-example-lambda-function/target/lammy-example-lambda-function.jar" \
             --handler "io.aleph0.lammy.example.lambdafunction.stream.ExampleStreamLambdaProcessor::handleRequest" \
             --runtime "java8" \
             --role "arn:aws:iam::${{ vars.CI_AWS_ACCOUNT_ID }}:role/lammy-lambda-execution-role"
+          # Export the function name for later steps
+          echo "FUNCTION_NAME=$FUNCTION_NAME" >> $GITHUB_ENV
 
       # ----- Invoke the Ephemeral Lambda Function -----
       - name: Invoke ephemeral Lambda function
+        env:
+          FUNCTION_NAME: ${{ env.FUNCTION_NAME }}
         run: |
           aws lambda invoke \
             --function-name "$FUNCTION_NAME" \
@@ -80,5 +83,7 @@ jobs:
       # ----- Delete the Ephemeral Lambda Function (always runs) -----
       - name: Delete ephemeral Lambda function
         if: always()
+        env:
+          FUNCTION_NAME: ${{ env.FUNCTION_NAME }}
         run: |
           aws lambda delete-function --function-name "$FUNCTION_NAME"
