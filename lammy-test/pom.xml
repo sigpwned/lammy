@@ -23,6 +23,9 @@
                     <configuration>
                         <!-- TODO Switch to parallel? See https://maven.apache.org/surefire/maven-failsafe-plugin/examples/junit-platform.html -->
                         <forkCount>4</forkCount>
+
+                        <!-- Reusing forks seems to cause intermittent errors -->
+                        <reuseForks>false</reuseForks>
                         <systemPropertyVariables>
                             <maven.lammy.version>${project.version}</maven.lammy.version>
                             <maven.project.basedir>${project.basedir}</maven.project.basedir>
