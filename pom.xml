@@ -95,6 +95,7 @@
         <module>lammy-bom</module>
         <module>lammy-lambda-bom</module>
         <module>lammy-lambda-parent</module>
+        <module>lammy-example-lambda-function</module>
         <module>lammy-test</module>
     </modules>
 
