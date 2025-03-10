@@ -58,7 +58,7 @@ jobs:
         run: |
           aws lambda create-function \
             --function-name "$FUNCTION_NAME" \
-            --zip-file "file://lammy-example-lambda-function/target/lammy-example-lambda-function.jar" \
+            --zip-file "fileb://lammy-example-lambda-function/target/lammy-example-lambda-function.jar" \
             --handler "io.aleph0.lammy.example.lambdafunction.stream.ExampleStreamLambdaProcessor::handleRequest" \
             --runtime "java8" \
             --role "arn:aws:iam::${{ vars.CI_AWS_ACCOUNT_ID }}:role/lammy-lambda-execution-role"
