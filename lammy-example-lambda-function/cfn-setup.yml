@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: |
+  This CloudFormation template sets up an AWS account for use in performing
+  live testing of a lammy function during CI, per the
+  .github/workflows/live-tests.yml workflow.
+
+Parameters:
+  GitHubOrganization:
+    Type: String
+    Description: The name of the GitHub organization, e.g., aleph0io
+    AllowedPattern: "^[a-zA-Z0-9]+$"
+
+Resources:
+  GitHubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: "https://token.actions.githubusercontent.com"
+      ClientIdList:
+        - "sts.amazonaws.com"
+      ThumbprintList:
+        - 6938fd4d98bab03faadb97b34396831e3780aea1
+        - 1c58a3a8518e8759bf075b76b750d4f2df264fcd
+
+  LammyCiRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: lammy-ci-role
+      Description: "Role for CI pipelines to manage ephemeral Lambda functions via GitHub OIDC."
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !GetAtt GitHubOidcProvider.Arn
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              # Allow any repo; adjust the pattern as needed.
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+                token.actions.githubusercontent.com:sub: !Sub "repo:${GitHubOrganization}/lammy"
+      Policies:
+        - PolicyName: LambdaManagement
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - lambda:CreateFunction
+                  - lambda:InvokeFunction
+                  - lambda:DeleteFunction
+                Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:lammy-ci-*"
+
+  LammyLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: lammy-lambda-execution-role
+      Description: "Lambda execution role for lammy functions with minimal permissions."
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        # Provides basic permissions for Lambda functions (e.g. writing logs to CloudWatch)
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+Outputs:
+  GitHubOidcProviderArn:
+    Description: "ARN of the GitHub OIDC Provider"
+    Value: !GetAtt GitHubOidcProvider.Arn
+    Export:
+      Name: GitHubOidcProvider
+
+  LammyCiRoleArn:
+    Description: "ARN of the lammy-ci-role"
+    Value: !GetAtt LammyCiRole.Arn
+    Export:
+      Name: LammyCiRole
+
+  LammyLambdaExecutionRoleArn:
+    Description: "ARN of the lammy-lambda-execution-role"
+    Value: !GetAtt LammyLambdaExecutionRole.Arn
+    Export:
+      Name: LammyLambdaExecutionRole
